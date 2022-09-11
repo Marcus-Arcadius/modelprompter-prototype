@@ -1,44 +1,44 @@
 <template lang="pug">
 div
-  q-table.midiblocks-table(:data='midiblockValues' :columns='columns' row-key='uuid')
+  q-table.diffblocks-table(:data='diffblockValues' :columns='columns' row-key='uuid')
     template(v-slot:body-cell-actions='props')
       q-td(:props='props')
-        q-btn.q-mr-lg(size='sm' color='secondary' @click='loadMidiblock(props)' icon='fas fa-folder-open') Load
-        q-btn.q-mr-lg(size='sm' color='tertiary' @click='remixMidiblock(props)' icon='fas fa-copy') Remix
-        q-btn(size='sm' color='negative' @click='deleteMidiblock(props)' icon='fas fa-trash') Delete
-  DialogDeleteMidiblock(v-model='dialog.deleteMidiblock' :midiblock='dialogMidiblock')
+        q-btn.q-mr-lg(size='sm' color='secondary' @click='loadDiffblock(props)' icon='fas fa-folder-open') Load
+        q-btn.q-mr-lg(size='sm' color='tertiary' @click='remixDiffblock(props)' icon='fas fa-copy') Remix
+        q-btn(size='sm' color='negative' @click='deleteDiffblock(props)' icon='fas fa-trash') Delete
+  DialogDeleteDiffblock(v-model='dialog.deleteDiffblock' :diffblock='dialogDiffblock')
 </template>
 
 <script>
 import store from 'store'
 import {mapState} from 'vuex'
-import DialogDeleteMidiblock from '../dialog/DeleteMidiblock'
+import DialogDeleteDiffblock from '../dialog/DeleteDiffblock'
 import {v4 as uuidv4} from 'uuid'
 
 /**
- * Displays a table containing all available midiblocks
+ * Displays a table containing all available diffblocks
  */
 export default {
-  name: 'MidiblocksTable',
+  name: 'DiffblocksTable',
 
-  components: {DialogDeleteMidiblock},
+  components: {DialogDeleteDiffblock},
 
   computed: {
-    ...mapState(['midiblocks']),
+    ...mapState(['diffblocks']),
 
-    midiblockValues () {
-      return Object.values(this.midiblocks)
+    diffblockValues () {
+      return Object.values(this.diffblocks)
     }
   },
 
   data () {
     return {
-      // The midiblock to use inside a dialog
-      dialogMidiblock: null,
+      // The diffblock to use inside a dialog
+      dialogDiffblock: null,
       
       // Dialog models
       dialog: {
-        deleteMidiblock: false
+        deleteDiffblock: false
       },
       
       // Table columns
@@ -68,16 +68,16 @@ export default {
 
   methods: {
     /**
-     * Loads the midiblock
+     * Loads the diffblock
      */
-    loadMidiblock (props) {
-      const midiblock = this.midiblocks[props.key]
+    loadDiffblock (props) {
+      const diffblock = this.diffblocks[props.key]
       
       // Load block
-      store.set('currentStudio', midiblock)
+      store.set('currentStudio', diffblock)
       this.$q.notify({
         type: 'positive',
-        message: `Midilock "${midiblock.title}" loaded!`,
+        message: `Difflock "${diffblock.title}" loaded!`,
         timeout: 3000
       })
 
@@ -90,28 +90,28 @@ export default {
     },
 
     /**
-     * Delete the midiblock
+     * Delete the diffblock
      */
-    deleteMidiblock (props) {
-      this.dialogMidiblock = this.midiblocks[props.key]
-      this.dialog.deleteMidiblock = true
+    deleteDiffblock (props) {
+      this.dialogDiffblock = this.diffblocks[props.key]
+      this.dialog.deleteDiffblock = true
     },
 
     /**
-     * Remix a midiblock
+     * Remix a diffblock
      */
-    remixMidiblock (props) {
-      const block = Object.assign({}, this.midiblocks[props.key])
+    remixDiffblock (props) {
+      const block = Object.assign({}, this.diffblocks[props.key])
       block.uuid = uuidv4()
       block.title += ' [Remixed]'
 
-      this.$store.commit('set', [`midiblocks["${block.uuid}"]`, block])
+      this.$store.commit('set', [`diffblocks["${block.uuid}"]`, block])
       store.set('currentStudio', block)
       store.set('isStudioUnsaved', false)
-      store.set('midiblocks', this.midiblocks)
+      store.set('diffblocks', this.diffblocks)
       this.$q.notify({
         type: 'positive',
-        message: `Midilock "${block.title}" remixed!`,
+        message: `Difflock "${block.title}" remixed!`,
         timeout: 3000
       })
 
@@ -127,9 +127,9 @@ export default {
 </script>
 
 <style lang="sass">
-.midiblocks-table tbody tr td:nth-child(1)
+.diffblocks-table tbody tr td:nth-child(1)
   font-size: 1.25em
   font-weight: bold
-.midiblocks-table tbody tr td:nth-child(2)
+.diffblocks-table tbody tr td:nth-child(2)
   white-space: pre-wrap
 </style>

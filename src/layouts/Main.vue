@@ -110,7 +110,7 @@ export default {
         links: [
           {
             title: 'Home',
-            description: 'Get an overview of what Midiblocks is about',
+            description: 'Get an overview of what Diffusion Blocks is about',
             link: '/',
             icon: 'fas fa-home'
           },
@@ -128,7 +128,7 @@ export default {
           },
           {
             title: 'Library',
-            description: 'Browse our library of user created Midiblocks and learn how to use them',
+            description: 'Browse our library of user created Diffusion Blocks and learn how to use them',
             link: '/library',
             icon: 'fas fa-cubes'
           },

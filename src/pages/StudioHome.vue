@@ -1,72 +1,72 @@
 <template lang="pug">
 q-page.full-height
   Workspace(ref='workspace' :options='options' :toolbox='toolbox' :blocks='[]' @change='workspaceEventHandler')
-    q-item(@click='saveMidiblock' clickable)
+    q-item(@click='saveDiffblock' clickable)
       q-item-section(avatar)
         q-icon(color='secondary' name='fas fa-save')
       q-item-section.gt-sm
         q-badge(v-if='isUnsaved' color='negative' floating) Unsaved changes
-        q-item-label.text-secondary Save Midiblock
+        q-item-label.text-secondary Save Diffblock
     q-item.q-mb-lg(@click='showSettings' clickable)
       q-item-section(avatar)
         q-icon(name='fas fa-cogs')
       q-item-section.gt-sm
-        q-item-label Midiblock Settings
+        q-item-label Diffblock Settings
     q-item(@click='dialog.confirmNew = true' clickable)
       q-item-section(avatar)
         q-icon(color='positive' name='fas fa-file')
       q-item-section.gt-sm
-        q-item-label.text-positive New Midiblock
+        q-item-label.text-positive New Diffblock
     q-item(@click='dialog.loadBlock = true' clickable)
       q-item-section(avatar)
         q-icon(color='positive' name='fas fa-folder-open')
       q-item-section.gt-sm
-        q-item-label.text-positive Load Midiblock
+        q-item-label.text-positive Load Diffblock
     q-item.q-mb-lg(@click='dialog.remixConfirm = true' clickable)
       q-item-section(avatar)
         q-icon(color='positive' name='fas fa-copy')
       q-item-section.gt-sm
-        q-item-label.text-positive Remix Midiblock
+        q-item-label.text-positive Remix Diffblock
     q-item(@click='dialog.deleteConfirm = true' clickable)
       q-item-section(avatar)
         q-icon(color='negative' name='fas fa-trash')
       q-item-section.gt-sm
-        q-item-label.text-negative Delete Midiblock
+        q-item-label.text-negative Delete Diffblock
 
   //- Dialogs
   DialogConfirm(v-model='dialog.confirmNew'
-    @accept='createNewMidiblock'
+    @accept='createNewDiffblock'
     icon='fas fa-file'
-    title='Create new Midiblock?')
-      p Are you sure you'd like to create a new Midiblock? Any unsaved changes will be lost.
+    title='Create new Diffblock?')
+      p Are you sure you'd like to create a new Diffblock? Any unsaved changes will be lost.
 
   DialogConfirm(v-model='dialog.remixConfirm'
-    @accept='remixMidiblock'
+    @accept='remixDiffblock'
     icon='fas fa-copy'
-    title='Remix this midiblock?')
-      p Any unsaved changes to the current midiblock will be lost.
-      p Are you sure you'd like to create a copy of this midiblock and open it?
+    title='Remix this diffblock?')
+      p Any unsaved changes to the current diffblock will be lost.
+      p Are you sure you'd like to create a copy of this diffblock and open it?
 
   DialogConfirm(v-model='dialog.editSettings'
     @accept='updateSettings'
     bg='primary'
     icon='fas fa-cogs'
-    title='Midiblock Settings'
+    title='Diffblock Settings'
     accept-label='Update')
       q-input.q-mb-md(ref='autofocus' label='Title' color='secondary' v-model='meta._title' filled)
       q-input(label='Description' color='secondary' v-model='meta._description' type='textarea' filled)
       
-  DialogLoadMidiblock(v-model='dialog.loadBlock')
+  DialogLoadDiffblock(v-model='dialog.loadBlock')
 
-  DialogDeleteMidiblock(v-model='dialog.deleteConfirm' :midiblock='block')
+  DialogDeleteDiffblock(v-model='dialog.deleteConfirm' :diffblock='block')
 </template>
 
 <script>
 import {throttle, cloneDeep, set, sortBy} from 'lodash'
 import {mapState} from 'vuex'
 import Workspace from '../components/Workspace'
-import DialogLoadMidiblock from '../components/dialog/LoadMidiblock'
-import DialogDeleteMidiblock from '../components/dialog/DeleteMidiblock'
+import DialogLoadDiffblock from '../components/dialog/LoadDiffblock'
+import DialogDeleteDiffblock from '../components/dialog/DeleteDiffblock'
 import DialogConfirm from '../components/dialog/Confirm'
 import store from 'store'
 import webmidi from 'webmidi'
@@ -80,7 +80,7 @@ import {v4 as uuidv4} from 'uuid'
 export default {
   name: 'MainLayout',
 
-  components: {Workspace, DialogConfirm, DialogLoadMidiblock, DialogDeleteMidiblock},
+  components: {Workspace, DialogConfirm, DialogLoadDiffblock, DialogDeleteDiffblock},
 
   computed: {
     /**
@@ -98,7 +98,7 @@ export default {
   },
 
   /**
-   * Initialize WebMidi
+   * Initialize Webmidi
    */
   mounted () {
     set(window, 'app.$studio', this)
@@ -153,7 +153,7 @@ export default {
     // Autosave with CTRL+S
     this.$mousetrap.bindGlobal('ctrl+s', ev => {
       ev.preventDefault()
-      this.saveMidiblock()
+      this.saveDiffblock()
     })
   },
 
@@ -182,7 +182,7 @@ export default {
     const currentStudio = store.get('currentStudio', {})
 
     return {
-      // Whether the autosave has been saved to a midiblock or not
+      // Whether the autosave has been saved to a diffblock or not
       isUnsaved: store.get('isStudioUnsaved'),
       
       hasLoaded: false,
@@ -240,42 +240,42 @@ export default {
     },
 
     /**
-     * Save the midiblock
+     * Save the diffblock
      */
-    saveMidiblock () {
-      const midiblocks = store.get('midiblocks', {})
-      midiblocks[this.block.uuid] = this.saveData
-      store.set('midiblocks', midiblocks)
+    saveDiffblock () {
+      const diffblocks = store.get('diffblocks', {})
+      diffblocks[this.block.uuid] = this.saveData
+      store.set('diffblocks', diffblocks)
       store.set('isStudioUnsaved', false)
-      this.$store.commit('set', ['midiblocks', midiblocks])
+      this.$store.commit('set', ['diffblocks', diffblocks])
       this.isUnsaved = false
 
       this.$q.notify({
         type: 'positive',
-        message: `Midiblock "${midiblocks[this.block.uuid].title}" saved`,
+        message: `Diffblock "${diffblocks[this.block.uuid].title}" saved`,
         timeout: 2000
       })
     },
 
     /**
-     * Creates a new midiblock
+     * Creates a new diffblock
      */
-    createNewMidiblock () {
+    createNewDiffblock () {
       this.block.uuid = uuidv4()
       store.remove('currentStudio')
       this.$store.commit('tally', 'reloads')
-      this.$store.commit('set', ['lastEvent', {log: 'New midiblock created'}])
+      this.$store.commit('set', ['lastEvent', {log: 'New diffblock created'}])
     },
 
     /**
-     * Create a clone of a midiblock
+     * Create a clone of a diffblock
      */
-    remixMidiblock () {
+    remixDiffblock () {
       this.block.uuid = uuidv4()
       this.meta.title += ' [Remixed]'
 
       this.autosave()
-      this.saveMidiblock()
+      this.saveDiffblock()
       
       this.$store.commit('tally', 'reloads')
     },
@@ -497,7 +497,7 @@ export default {
       // Run the code
       let data = Object.assign({}, ev)
       data.target = Object.assign({}, data.target)
-      delete data.target._midiInput
+      delete data.target._diffInput
       delete data.target._userHandlers
       delete data.target.lastMessage
       data = JSON.stringify(data)
@@ -506,16 +506,16 @@ export default {
       this.$refs.workspace.interpreter.run()
 
       // Update device message
-      let midiName
-      let midiData
+      let diffName
+      let diffData
       switch (eventName) {
         case 'noteon':
         case 'noteoff':
-          midiName = `[${ev.note.number}, ${ev.note.name}, ${ev.note.octave}]`
+          diffName = `[${ev.note.number}, ${ev.note.name}, ${ev.note.octave}]`
           break;
 
         case 'controlchange':
-          midiName = `[${ev.controller.number}, ${ev.controller.name}]`
+          diffName = `[${ev.controller.number}, ${ev.controller.name}]`
           break;
       }
       
@@ -523,7 +523,7 @@ export default {
         `devices.inputs['${ev.target.id}'].lastMessage`,
         `<div>
           <strong>${eventName}</strong>:
-          <span>${midiName}</span>
+          <span>${diffName}</span>
         </div>
         <div>
           <strong>data</strong>:

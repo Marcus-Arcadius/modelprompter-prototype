@@ -16,7 +16,7 @@ import BlocksGrid from '../library/BlocksGrid'
 import store from 'store'
 
 /**
- * Displays a dialog box for grabbing a Midiblock
+ * Displays a dialog box for grabbing a Block
  */
 export default {
   name: 'DialogLoadBlock',

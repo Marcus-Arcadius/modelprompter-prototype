@@ -10,7 +10,7 @@ q-page
           p
             small (but feel free to explore anyways)
           p
-            small <a href="https://github.com/midiblocks/midiblocks">GitHub</a> &middot; <a href="https://twitter.com/midiblocks">Twitter</a>
+            small <a href="https://github.com/EverestWonder/diffusion-blocks">GitHub</a> &middot; <a href="https://twitter.com/everestwonder">Twitter</a>
 </template>
 
 <script>

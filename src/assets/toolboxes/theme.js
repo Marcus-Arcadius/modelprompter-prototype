@@ -1,6 +1,6 @@
 import Blockly from 'blockly'
 
-export default Blockly.Theme.defineTheme('midiblocks', {
+export default Blockly.Theme.defineTheme('diffblocks', {
   blockStyles: {
     // "colour_blocks": {
     //   "colourPrimary": "#CF63CF",

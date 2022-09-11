@@ -8,7 +8,7 @@ q-btn.full-width(type='a' color='secondary' icon='fas fa-user' @click='showModal
           span.q-ml-md Import / Export Profile
       q-card-section
         //- @todo Add link to Patreon here
-        p We plan on adding user profiles soon, but for now use the buttons below to import and export your midiblocks and workspaces.
+        p We plan on adding user profiles soon, but for now use the buttons below to import and export your blocks and workspaces.
       q-card-actions(align='right')
         q-btn(flat @click='isDialogVisible = false') Cancel
         q-file.hidden(ref='file' v-model='file')
@@ -25,7 +25,7 @@ q-btn.full-width(type='a' color='secondary' icon='fas fa-user' @click='showModal
     title='Reset everything?'
     accept-label='Reset'
     @accept='reset')
-      p This will reset everything to the <a href="https://github.com/MIDIBlocks/midiblocks/releases">most recent Midiblocks release</a>.
+      p This will reset everything to the <a href="https://github.com/EverestWonder/diffusion-blocks/releases">most recent Diffusion Blocks release</a>.
       p You'll lose your current workspaces, but get all the latest core workspaces.
       p You'll still be able to import your own workspaces after.
 </template>
@@ -74,7 +74,7 @@ export default {
               })
 
               this.$store.commit('set', ['blocks', store.get('blocks')])
-              this.$store.commit('set', ['midiblocks', store.get('midiblocks')])
+              this.$store.commit('set', ['diffblocks', store.get('diffblocks')])
 
               this.$store.commit('tally', 'reloads')
             })
@@ -111,7 +111,7 @@ export default {
         .getFullYear()
           + '-' + ('0' + (new Date().getMonth() + 1)).slice(-2)
           + '-' + ('0' + new Date().getDate()).slice(-2)
-      fileDownload(JSON.stringify(data, null, 2), `midiblocks-${date}.json`)
+      fileDownload(JSON.stringify(data, null, 2), `diffblocks-${date}.json`)
 
       this.isDialogVisible = false
     },

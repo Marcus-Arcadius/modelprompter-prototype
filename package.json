@@ -1,9 +1,9 @@
 {
-  "name": "midiblocks",
+  "name": "diffusion-blocks",
   "version": "0.2.0",
   "description": "A visual MIDI mapping and scripting platform",
-  "productName": "Midiblocks",
-  "author": "Oz Ramos <midiblocks@gmail.com>",
+  "productName": "Diffusion Blocks",
+  "author": "Everest Wonder <mounteverestwonder@gmail.com>",
   "private": true,
   "scripts": {
     "start": "npm run dev",

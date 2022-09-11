@@ -3,8 +3,8 @@ q-page.full-height
   section.content
     h1 Library
 
-    h4 Midiblocks
-    MidiblocksTable
+    h4 Diffusion Blocks
+    DiffblocksTable
 
     h4 Building blocks
     BlocksGrid
@@ -12,13 +12,13 @@ q-page.full-height
 
 <script>
 import BlocksGrid from '../components/library/BlocksGrid'
-import MidiblocksTable from '../components/library/MidiblocksTable'
+import DiffblocksTable from '../components/library/DiffblocksTable'
 import {mapState} from 'vuex'
 import store from 'store'
 
 export default {
   name: 'LibraryHome',
 
-  components: {BlocksGrid, MidiblocksTable}
+  components: {BlocksGrid, DiffblocksTable}
 }
 </script>

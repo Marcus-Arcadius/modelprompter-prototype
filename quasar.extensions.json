@@ -1,6 +1,6 @@
 {
   "@quasar/qenv": {
-    "common_root_object": "midiblocks",
+    "common_root_object": "diffblocks",
     "add_qenv_to_gitignore": true
   }
 }

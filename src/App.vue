@@ -66,7 +66,7 @@ export default {
         store.set(key, defaultWorkspace.localStorage[key])
       })
       this.$store.commit('set', ['blocks', defaultWorkspace.localStorage.blocks])
-      this.$store.commit('set', ['midiblocks', defaultWorkspace.localStorage.midiblocks])
+      this.$store.commit('set', ['diffblocks', defaultWorkspace.localStorage.diffblocks])
     }
 
     /**

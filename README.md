@@ -1,5 +1,5 @@
 <div align="center">
-  <h3>🚧 This repo is being rebranded from Midiblocks to Diffusionblocks and will take a few more days 🚧</h3>
+  <h3>🚧 This repo is being rebranded from Midiblocks to Diffusion Blocks and will take a few more days 🚧</h3>
 </div>
 
 <br>
@@ -7,7 +7,7 @@
 <br>
 
 <div align="center">
-  <h1><a href="https://github.com/midiblocks/midiblocks"><img height=120 src="https://i.imgur.com/R4nxK4o.jpg"></a></h1>
+  <h1><a href="https://github.com/EverestWonder/diffusion-blocks"><img height=120 src="https://i.imgur.com/R4nxK4o.jpg"></a></h1>
   <h2>An all-in-one prompting, scripting, and experimentation platform for Stable Diffusion.</h2>
   <br>
   <h3>🚧 This repo is still in the rapid prototyping phase 🚧</h3>
@@ -21,8 +21,8 @@
 
 ## TL:DR;
 ```bash
-git clone https://github.com/everestwonder/diffusionblocks
-cd diffusionblocks
+git clone https://github.com/everestwonder/diffusion-blocks
+cd diffusion-blocks
 npm install
 npm start
 # Point your browser to http://localhost:8080
@@ -57,11 +57,11 @@ npm start
 
 # About
 
-**Midiblocks is a visual, all-in-one MIDI mapping, scripting, and live coding platform for driving highly collaborative MIDI experiences.**
+**Diffusion Blocks is a visual, all-in-one MIDI mapping, scripting, and live coding platform for driving highly collaborative MIDI experiences.**
 
-Some things Midiblocks can (eventually) help you do:
+Some things Diffusion Blocks can (eventually) help you do:
 - Quickly map MIDI to JavaScript variables, functions, and events on any web site or web service
-- Use MIDI to drive custom apps with libraries like [magenta.js](https://magenta.tensorflow.org/), [ml5.js](https://ml5js.org/), [p5.js](https://p5js.org/), [handsfree.js](https://github.com/midiblocks/handsfree), and others
+- Use MIDI to drive custom apps with libraries like [magenta.js](https://magenta.tensorflow.org/), [ml5.js](https://ml5js.org/), [p5.js](https://p5js.org/), [handsfree.js](https://github.com/everestwonder/handsfree), and others
 - Send MIDI to your native [Digital Audio Workstations (DAWs)](https://en.wikipedia.org/wiki/Digital_audio_workstation#List_of_notable_commercial_DAWs) and apps
 - Work on mobile with no internet required
 - Work on projects collaboratively
@@ -146,8 +146,8 @@ Some things Midiblocks can (eventually) help you do:
 - [NodeJS LTS (eg 12.x.x)](https://nodejs.org/en/)
 
 ## Installing
-- Open terminal and clone this repository with: `git clone https://github.com/midiblocks/midiblocks`
-- Change into directory with: `cd midiblocks`
+- Open terminal and clone this repository with: `git clone https://github.com/everestwonder/diffusion-blocks`
+- Change into directory with: `cd diffusion-blocks`
 - Run `npm install` from the project root to install dependencies (> 250Mb)
 - Run `npm start` from the project's root to start the app at [localhost:8080](http://localhost:8080)
 
@@ -211,7 +211,7 @@ The following is available inside `localStorage`:
 ```js
 {
   blocks: [],           // All loaded Factory Blocks
-  midiblocks: [],       // All loaded Studio Midiblocks
+  diffblocks: [],       // All loaded Studio Diffusion Blocks
   currentFactory: {},   // The Factory's last state (autosave)
   currentStudio: {},    // The Studio's last state (autosave)
   splitter: 50
@@ -230,7 +230,7 @@ The following is available inside `localStorage`:
 
 # License: [MIT](https://opensource.org/licenses/MIT)
 
-Copyright 2020 midiblocks
+Copyright 2022 Everest Wonder
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
