@@ -1,0 +1,28 @@
+/**
+ * @license
+ * MyFonts Webfont Build ID 4031647, 2021-03-25T14:07:15-0400
+ * 
+ * The fonts listed in this notice are subject to the End User License
+ * Agreement(s) entered into by the website owner. All other parties are 
+ * explicitly restricted from using the Licensed Webfonts(s).
+ * 
+ * You may obtain a valid license at the URLs below.
+ * 
+ * Webfont: HaulageCommercial-Striped by Device
+ * URL: https://www.myfonts.com/fonts/device/haulage/commercial-striped/
+ * Copyright: Copyright (c) 1997 by Rian Hughes / Device Fonts. All rights reserved.
+ * 
+ * 
+ * 
+ * © 2021 MyFonts Inc
+*/
+
+
+/* @import must be at top of file, otherwise CSS will not work */
+@import url("//hello.myfonts.net/count/3d849f");
+  
+@font-face {
+  font-family: "HaulageCommercial-Striped";
+  src: url('webFonts/HaulageCommercialStriped/font.woff2') format('woff2'), url('webFonts/HaulageCommercialStriped/font.woff') format('woff');
+}
+
