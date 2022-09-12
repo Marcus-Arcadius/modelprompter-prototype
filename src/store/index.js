@@ -34,6 +34,34 @@ export default function (/* { ssrContext } */) {
       },
 
       /**
+       * txt2Img
+       */
+      txt2Img: {
+        tab: 'Images',
+
+        prompt: '',
+        defaultPrompt: 'a dr seuss illustration of robots building a city',
+        // @todo generate and persist this (and do we even need this?)
+        sessionHash: 'gwoivb63nj4',
+    
+        imgs: [],
+        width: 512,
+        height: 512,
+        steps: 40,
+    
+        isDreaming: false,
+        isStoppingDream: false,
+        dreamCheckInterval: 750, // milliseconds
+        dreamProgress: 0,
+    
+        numBatches: 1,
+        batchSize: 1,
+    
+        imageModal: false,
+        imageModalActiveImage: null,
+      },
+
+      /**
        * Global Studio props
        */
       studio: {
