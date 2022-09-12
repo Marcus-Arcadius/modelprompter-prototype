@@ -29,6 +29,18 @@ export default {
     Prompt
   },
 
+  watch: {
+    /**
+     * Toggle Handsfree and persist the state
+     */
+    settings: {
+      deep: true,
+      handler (settings) {
+        this.toggleHandsfree()
+      }
+    }
+  },
+
   computed: {
     ...mapState(['reloads', 'settings'])
   },
@@ -89,6 +101,9 @@ export default {
       this.$store.commit('push', ['eventLogs.warn', {log: args[0]}])
       warn(...args)
     }
+
+    // APIs
+    this.toggleHandsfree()
   },
 
   destroyed () {
@@ -103,7 +118,16 @@ export default {
     goHome () {
       this.$router.push({name: 'txt2Img'})
       this.errors.generic = ''
-    }
+    },
+
+    /**
+     * Toggle Handsfree on/off and persist the state
+     */
+    toggleHandsfree () {
+      this.settings.isFacePointerActive && this.$handsfree.start()
+      !this.settings.isFacePointerActive && this.$handsfree.isLooping && this.$handsfree.stop()
+      store.set('facepointer.active', this.settings.isFacePointerActive)
+    },
   }
 }
 </script>

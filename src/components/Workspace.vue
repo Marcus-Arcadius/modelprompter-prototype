@@ -68,6 +68,19 @@ export default {
       isFlyoutOpen: false,
       blockBeingDragged: false,
 
+      // Handsfree data
+      handsfree: {
+        // The BlocklyDragger object
+        // @see https://developers.google.com/blockly/reference/js/Blockly.BlockDragger#startBlockDrag
+        dragger: null,
+        
+        // Used for calculating drag deltas
+        orig: {
+          x: 0,
+          y: 0
+        }
+      },
+
       // Useful for re-showing a category toolbox (eg, after creating a variable)
       lastClickedCategory: null,
       isMouseInQuasarToolbox: false,
@@ -108,10 +121,16 @@ export default {
 
     // Add blocks
     this.addBlocks()
+
+    // Handsfree
+    document.addEventListener('handsfree-blockly-click', this.onBlocklyHandsfreeClick)
+    document.addEventListener('handsfree-data', this.onHandsfree)
   },
 
   beforeDestroy () {
     this.$root.$off('blockly.prompt.submit', this.onPromptSubmit)
+    document.removeEventListener('handsfree-blockly-click', this.onBlocklyHandsfreeClick)
+    document.removeEventListener('handsfree-data', this.onHandsfree)
   },
 
   methods: {
@@ -153,6 +172,55 @@ export default {
     onTouch (ev) {
       if (ev.type === 'touchstart') {
         this.wasToolboxTouched = true
+      }
+    },
+
+    /**
+     * Handle clicking on elements handsfree
+     */
+    onBlocklyHandsfreeClick (ev) {
+      let $block
+      
+      // Drop block if dragging
+      if (this.handsfree.dragger) {
+        this.handsfree.dragger.endBlockDrag(ev, {
+          x: this.$handsfree.weboji.data.pointer.x - this.handsfree.orig.x,
+          y: this.$handsfree.weboji.data.pointer.y - this.handsfree.orig.y
+        })
+        this.handsfree.dragger = null
+        return
+      }
+
+      // Determine if inside a Workspace or toolbox
+      if (this.isInToolbox(ev.detail.$closestBlockly)) {
+        const flyout = this.blockly.getToolbox().getFlyout()
+        $block = flyout.getWorkspace().getBlockById(ev.detail.$closestBlockly.getAttribute('data-id'))
+        $block = flyout.createBlock($block)
+      } else {
+        // Start dragging
+        $block = this.blockly.getBlockById(ev.detail.$closestBlockly.getAttribute('data-id'))
+      }
+
+      this.handsfree.dragger = new Blockly.BlockDragger($block, this.blockly)
+      this.handsfree.dragger.startBlockDrag({
+        x: 0,
+        y: 0
+      })
+      this.handsfree.orig = {
+        x: this.$handsfree.weboji.data.pointer.x,
+        y: this.$handsfree.weboji.data.pointer.y
+      }
+    },
+
+    /**
+     * Update drag if dragging
+     */
+    onHandsfree (data) {
+      if (this.handsfree.dragger) {
+        this.handsfree.dragger.dragBlock(data, {
+          x: this.$handsfree.weboji.data.pointer.x - this.handsfree.orig.x,
+          y: this.$handsfree.weboji.data.pointer.y - this.handsfree.orig.y
+        })
       }
     },
 
