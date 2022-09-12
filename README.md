@@ -1,13 +1,6 @@
-<div align="center">
-  <h3>🚧 This repo is being rebranded from Midiblocks to Diffusion Blocks and will take a few more days 🚧</h3>
-</div>
-
-<br>
-<hr>
-<br>
+![image](https://user-images.githubusercontent.com/110780894/189554064-dea2053a-967b-4534-8c48-dcc52811c35b.png)
 
 <div align="center">
-  <h1><a href="https://github.com/EverestWonder/diffusion-blocks"><img height=120 src="https://i.imgur.com/R4nxK4o.jpg"></a></h1>
   <h2>An all-in-one prompting, scripting, and experimentation platform for Stable Diffusion.</h2>
   <br>
   <h3>🚧 This repo is still in the rapid prototyping phase 🚧</h3>
