@@ -3,10 +3,15 @@ const routes = [
     path: '/',
     component: () => import('layouts/Main.vue'),
     children: [
+      // {
+      //   name: 'Home',
+      //   path: '',
+      //   component: () => import('pages/Home.vue')
+      // },
       {
-        name: 'Home',
+        name: 'txt2Img',
         path: '',
-        component: () => import('pages/Home.vue')
+        component: () => import('pages/txt2Img.vue')
       },
       {
         name: 'Studio',

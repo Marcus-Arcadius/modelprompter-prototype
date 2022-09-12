@@ -109,7 +109,7 @@ export default {
     },
 
     goHome () {
-      this.$router.push({name: 'Home'})
+      this.$router.push({name: 'txt2Img'})
       this.errors.generic = ''
     },
 
