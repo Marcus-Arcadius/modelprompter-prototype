@@ -22,7 +22,6 @@ npm start
 ```
 
 
-
 # Contents
 - [About](#about)
   - [The Studio](#the-studio)
@@ -163,6 +162,8 @@ For more info, including on how to support Firefox, Internet Explorer, and Safar
 
 
 # Dev
+
+- This project uses Quasar 1, the docs for them are here: https://v1.quasar.dev/
 
 
 ## Command line scripts

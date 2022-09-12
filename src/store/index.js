@@ -29,8 +29,15 @@ export default function (/* { ssrContext } */) {
        * Settings
        */
       settings: {
+        // @todo Remove
         isFacePointerActive: store.get('facepointer.active', false),
-        isFacePointerToggleAlwaysOn: store.get('facepointer.alwaysOn', false)
+        isFacePointerToggleAlwaysOn: store.get('facepointer.alwaysOn', false),
+
+        /**
+         * GPU servers
+         */
+        servers: [
+        ],
       },
 
       /**

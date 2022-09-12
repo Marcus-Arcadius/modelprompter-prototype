@@ -53,7 +53,8 @@ module.exports = function (ctx) {
       'app.sass',
       'blockly.sass',
       'theme.sass',
-      'monaco.sass'
+      'monaco.sass',
+      'custom-theme.sass',
     ],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras

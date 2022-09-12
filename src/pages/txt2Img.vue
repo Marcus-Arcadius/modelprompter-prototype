@@ -11,30 +11,32 @@ q-page
           q-tab-panels(v-model='txt2Img.tab' animated='')
             q-tab-panel(name='Images')
               //- @todo Add random placeholders
-              q-input(v-model='txt2Img.prompt' label='Prompt' placeholder='a dr seuss illustration of robots building a city' autogrow='' @change='autosave')
+              q-input(v-model='txt2Img.prompt' label='Prompt' placeholder='a dr seuss illustration of robots building a city' autogrow @change='autosave')
                 template(v-slot:append='')
-                  q-btn(color='primary' label='Dream' icon='smart_toy' :disabled='txt2Img.isStoppingDream' @click='maybeDream')
-                    q-btn(v-if='txt2Img.isDreaming || txt2Img.isStoppingDream' :disabled='txt2Img.isStoppingDream' :loading='txt2Img.isStoppingDream' color='negative' label='Stop' icon='cancel' @click='stopDreaming')
+                  q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='txt2Img.isStoppingDream' @click='maybeDream')
+                  q-btn(v-if='txt2Img.isDreaming || txt2Img.isStoppingDream' :disabled='txt2Img.isStoppingDream' :loading='txt2Img.isStoppingDream' color='negative' label='Stop' icon='cancel' @click='stopDreaming')
               q-linear-progress.q-mt-md(size='20px' v-if='txt2Img.isDreaming || txt2Img.isStoppingDream' :value='txt2Img.dreamProgress' stripe='')
   .q-pa-md
     .q-col-gutter-md.row.items-start
       //- Config
       .col-4
-        //- Basics
-        q-badge(color='secondary') Steps: {{ txt2Img.steps }} 
-        q-slider(v-model='txt2Img.steps' :min='1' :max='150' :step='1' @change='autosave')
-        q-badge(color='secondary') Width: {{ txt2Img.width }} 
-        q-slider(v-model='txt2Img.width' :min='64' :max='2048' :step='64' @change='autosave' snap='')
-        q-badge(color='secondary') Height: {{ txt2Img.height }} 
-        q-slider(v-model='txt2Img.height' :min='64' :max='2048' :step='64' @change='autosave' snap='')
-        //- Batches
-        .q-col-gutter-md.row.items-start.q-mt-lg
-          .col-6
-            q-badge(color='secondary') Batches: {{ txt2Img.numBatches }} 
-            q-input(dense='' type='number' min='1' v-model.number='txt2Img.numBatches' @change='autosave')
-          .col-6
-            q-badge(color='secondary') Batch Size: {{ txt2Img.batchSize }} 
-            q-input(dense='' type='number' min='1' v-model.number='txt2Img.batchSize' @change='autosave')
+        q-card
+          q-card-section
+            //- Basics
+            q-badge Steps: {{ txt2Img.steps }} 
+            q-slider(v-model='txt2Img.steps' :min='1' :max='150' :step='1' @change='autosave')
+            q-badge Width: {{ txt2Img.width }} 
+            q-slider(v-model='txt2Img.width' :min='64' :max='2048' :step='64' @change='autosave' snap='')
+            q-badge Height: {{ txt2Img.height }} 
+            q-slider(v-model='txt2Img.height' :min='64' :max='2048' :step='64' @change='autosave' snap='')
+            //- Batches
+            .q-col-gutter-md.row.items-start.q-mt-lg
+              .col-6
+                q-badge Batches: {{ txt2Img.numBatches }} 
+                q-input(dense='' type='number' min='1' v-model.number='txt2Img.numBatches' @change='autosave')
+              .col-6
+                q-badge Batch Size: {{ txt2Img.batchSize }} 
+                q-input(dense='' type='number' min='1' v-model.number='txt2Img.batchSize' @change='autosave')
       //- Gallery
       .col-8
         .q-col-gutter-md.row.items-start
@@ -55,20 +57,20 @@ q-page
 import axios from 'axios'
 import {mapState} from 'vuex'
 import store from 'store'
-const storeKeys = ['tab', 'prompt', 'defaultPrompt', 'sessionHash', 'imgs', 'width', 'height', 'steps', 'isDreaming', 'isStoppingDream', 'dreamCheckInterval', 'dreamProgress', 'numBatches', 'batchSize', 'imageModal', 'imageModalActiveImage']
 
 export default {
   name: 'IndexPage',
 
   computed: {
-    ...mapState(['txt2Img'])
+    ...mapState(['txt2Img']),
+    ...mapState(['settings']),
   },
 
-  beforeMount () {
-    const localData = store.get(this.$options.name)
-    this.$store.commit('set', ['txt2Img', localData])
+  mounted () {
+    const text2Img = store.get('text2Img')
+    text2Img && this.$store.commit('set', ['txt2Img', text2Img])
   },
-
+  
   methods: {
     maybeDream() {
       if (!this.txt2Img.isDreaming) {
@@ -80,7 +82,7 @@ export default {
      * Check dream
      */
     checkDream() {
-      const api = axios.create({ baseURL: this.txt2Img.servers[0].base })
+      const api = axios.create({ baseURL: this.settings.servers[0].base })
 
       api
         .post('/api/predict', {
@@ -104,8 +106,8 @@ export default {
 
           if (this.txt2Img.isDreaming) {
             setTimeout(() => {
-              this.txt2Img.checkDream()
-            }, this.txt2Img.dreamCheckInterval)
+              this.checkDream()
+            }, this.dreamCheckInterval)
           }
         })
       // @todo Add error message
@@ -114,14 +116,15 @@ export default {
     /**
      * Starts the dream and occasionally checks in to update progress
      */
-    startDream() {
+    startDream () {
+      console.log(this, this.settings.servers)
       this.txt2Img.isDreaming = true
 
       setTimeout(() => {
         this.checkDream()
       }, 0)
-
-      const api = axios.create({ baseURL: this.txt2Img.servers[0].base })
+      // https://29390.gradio.app
+      const api = axios.create({ baseURL: this.settings.servers[0].base })
       api
         .post('/api/predict', {
           fn_index: 3,
@@ -209,7 +212,7 @@ export default {
     stopDreaming() {
       this.txt2Img.isStoppingDream = true
 
-      const api = axios.create({ baseURL: this.txt2Img.servers[0].base })
+      const api = axios.create({ baseURL: this.settings.servers[0].base })
       api
         .post('/api/predict', {
           fn_index: 5,
@@ -229,7 +232,7 @@ export default {
         data[key] = this.txt2Img[key]
       })
 
-      store.set(this.$options.name, data)
+      store.set('text2Img', data)
     },
 
     expandImage(ev) {

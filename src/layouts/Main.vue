@@ -5,10 +5,12 @@ q-layout(view='lHh Lpr lFf')
     q-toolbar
       q-btn(flat dense round icon='fas fa-bars' aria-label='Menu' @click='leftDrawerOpen = !leftDrawerOpen')
       q-toolbar-title(style='flex: 0 0 auto')
-        router-link.text-decoration-none.text-white(:to='{name: "txt2Img"}')
-          img.gt-sm.q-mr-sm(src='~assets/logo-title.png' height=32 style='vertical-align: middle')
-          img.lt-md.q-mr-sm(src='~assets/logo-title-favicon.png' height=32 style='vertical-align: middle')
-        small.gt-xs.q-ml-sm.text-secondary(style='font-size: .65em; display: inline-block; transform: translate(0, -3px)') {{version}}
+        span
+          router-link.text-decoration-none.text-white(:to='{name: "txt2Img"}')
+            img.gt-sm.q-mr-sm(src='~assets/logo-title.png' height=32 style='vertical-align: middle')
+            img.lt-md.q-mr-sm(src='~assets/logo-title-favicon.png' height=32 style='vertical-align: middle')
+          a(href='https://github.com/EverestWonder/diffusion-blocks/releases' target='_blank')
+            small.gt-xs.q-ml-sm.text-secondary(style='font-size: .65em; display: inline-block; transform: translate(0, -3px)') {{version}}
       q-space
 
       //- Studio controls

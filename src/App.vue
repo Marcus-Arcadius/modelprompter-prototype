@@ -69,6 +69,13 @@ export default {
       this.$store.commit('set', ['diffblocks', defaultWorkspace.localStorage.diffblocks])
     }
 
+    // Load initial data
+    const settings = store.get('settings')
+    settings && this.$store.commit('set', ['settings', settings])
+    const text2Img = store.get('text2Img')
+    text2Img && this.$store.commit('set', ['text2Img', text2Img])
+    console.log('app.vue', text2Img)
+
     /**
      * Override notify to update status
      * @todo Move this to a utility module
