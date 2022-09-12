@@ -45,7 +45,6 @@ module.exports = function (ctx) {
     boot: [
       'main',
       'mousetrap',
-      'handsfree'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
