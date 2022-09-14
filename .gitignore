@@ -1,3 +1,6 @@
+# Stable Diffusion
+/outputs
+
 # Security
 .quasar.env.json
 

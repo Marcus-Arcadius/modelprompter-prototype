@@ -37,6 +37,7 @@ export default function (/* { ssrContext } */) {
          * GPU servers
          */
         servers: [
+          'http://localhost:7860/'
         ],
       },
 
@@ -44,12 +45,14 @@ export default function (/* { ssrContext } */) {
        * txt2Img
        */
       txt2Img: {
+        queue: [],
+        curDream: {},
         tab: 'Images',
 
         prompt: '',
         defaultPrompt: 'a dr seuss illustration of robots building a city',
         // @todo generate and persist this (and do we even need this?)
-        sessionHash: 'gwoivb63nj4',
+        sessionHash: '3exs9au2lti',
     
         imgs: [],
         width: 512,

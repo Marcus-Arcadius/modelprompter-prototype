@@ -8,6 +8,10 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "quasar dev --use-local-storage",
+    "dream-server": "python webui.py --listen",
+    "dream-server-med": "python server/webui.py --medvram --opt-split-attention --listen",
+    "dream-server-16xx": "python server/webui.py --medvram --opt-split-attention --precision full --no-half --listen",
+    "dream-server-low": "python server/webui.py --lowvram --opt-split-attention --precision full --no-half --listen",
     "build": "quasar build --use-local-storage",
     "deploy": "npm run build && firebase deploy",
     "lint": "eslint --ext .js,.vue ./",
