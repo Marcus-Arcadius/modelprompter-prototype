@@ -14,11 +14,9 @@ q-page
               q-input(v-model='prompt' label='Prompt' placeholder='a dr seuss illustration of robots building a city' autogrow @change='autosave')
                 template(v-slot:append='')
                   q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
-                    //- q-tooltip(v-if='!settings.server || !settings.server.length' content-class='bg-red' content-style='font-size: 1em')
-                    //-   | No servers selected
                   q-btn(v-if='isDreaming || isWakingUp' :disabled='isWakingUp' :loading='isWakingUp' color='negative' label='Stop' icon='cancel' @click='stopDreaming')
               template(v-for='server in settings.servers')
-                q-linear-progress.q-mt-md(size='20px' v-if='server.isDreaming || server.isWakingUp' :value='server.dreamProgress' stripe='')
+                q-linear-progress.q-mt-md(dense color='blue' size='20px' v-if='server.isDreaming || server.isWakingUp' :value='+(server.dreamProgress)/100' stripe='')
                   span(style='position: absolute; width: 100%; text-align: center; color: #fff; display: block; font-size: .65em') {{server.base}}
   .q-pa-md
     .q-col-gutter-md.row.items-start
@@ -68,13 +66,12 @@ const sdDataScribe = function (context) {
   // Select statement based on data api
   if (true) {
     data = []
-    promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', 'numBatches', 'batchSize', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
-    defaults = [context.defaultPrompt, '', 'None', 40, 'Euler a', false, false, context.numBatches, context.batchSize, 7, -1, -1, 0, 0, 0, context.height, context.width, 'None', null, 'Seed', '', 'Steps', '', false, []]
-    console.log('defaults', defaults)
+    promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', '', '', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
+    // promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', 'numBatches', 'batchSize', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
+    defaults = [context.defaultPrompt, '', 'None', 40, 'Euler a', false, false, 1, 1, 7, -1, -1, 0, 0, 0, context.height, context.width, 'None', null, 'Seed', '', 'Steps', '', false, []]
   
     // Build the data fro the given dictionary and defaults
     promptDictionary.forEach((key, n) => {
-      console.log(key)
       if (key) {
         data.push(context[key] || defaults[n])
       } else {
@@ -160,10 +157,7 @@ export default {
       // Create the batch
       const batch = []
       for (let i = 0; i < this.batchSize; i++) {
-        // Remove extra fields
-        const data = Object.assign({}, this.txt2Img)
-        delete data.queue
-        batch.push(data)
+        batch.push(sdDataScribe(this))
       }
       this.queue.push(...batch)
 
@@ -183,8 +177,6 @@ export default {
      * Check dream
      */
     checkDream (server, api) {
-      console.log('checkDream', server)
-      
       api
       .post('/api/predict', {
         fn_index: 4,
@@ -197,7 +189,7 @@ export default {
 
         // If we're dreaming, update the progress
         // @todo handle multiple dreams
-        if (data.isGenerating) {
+        if (server.isDreaming || response.data.isGenerating) {
           // Create a dummy DOM to extract the progress
           const $dom = document.createElement('div')
           $dom.innerHTML = data
@@ -205,18 +197,24 @@ export default {
 
           // Update progress in UI
           if ($width?.innerHTML) {
-            server.dreamProgress = parseInt($width.innerHTML.replace('%', '')) / 100
+            server.dreamProgress = parseInt($width.innerHTML.replace('%', ''))
           } else {
             server.dreamProgress = 0
           }
 
           // Check the dream again
-          if (server.isDreaming) {
+          if (server.dreamProgress < 100) {
             setTimeout(() => {
               this.checkDream(server, api)
             }, this.dreamCheckInterval)
+          } else {
+            this.wakeUp()
           }
 
+          // Update UI
+          this.$nextTick(() => {
+            this.$forceUpdate()
+          })
         // Otherwise start dreaming
         } else {
           !server.isDreaming && this.startDream(server, api)
@@ -236,21 +234,25 @@ export default {
      * Starts the dream and occasionally checks in to update progress
      */
     startDream (server, api) {
+      if (!this.queue.length) return
+      
+      // Start checking for progress
       server.isDreaming = true
       server.progress = 0
-      
       this.$nextTick(() => {
         this.$forceUpdate()
 
         setTimeout(() => {
           this.checkDream(server, api)
-        }, 0)
+        }, this.dreamCheckInterval)
       })
 
+      // Actuall start dream
+      const data = this.queue.shift()
       api
         .post('/api/predict', {
           fn_index: 3,
-          data: sdDataScribe(this),
+          data: data,
           session_hash: this.sessionHash,
         })
         .then((response) => {
@@ -262,17 +264,16 @@ export default {
 
           const imgs = []
           data[0].forEach((img) => {
-            imgs.push(img)
+            imgs.unshift(img)
           })
 
-          this.imgs.push(...imgs)
+          this.imgs.unshift(...imgs)
 
           // Run next in queue
-          server.isDreaming = false
-          server.isWakingUp = false
+          this.wakeUp(server)
+          this.startDream(server, api)
         })
         .catch((err) => {
-          console.log('CATCH', err)
           this.$q.notify({
             color: 'negative',
             position: 'top',
@@ -283,37 +284,30 @@ export default {
     },
 
     /**
-     * Stop Dreaming
-     *
+     * Frees up local data and allows the server to be pinged again
      */
-    stopDreaming () {
-      this.isWakingUp = true
-
-      const api = axios.create({ baseURL: this.settings.servers[0].base })
-      api
-        .post('/api/predict', {
-          fn_index: 5,
-        })
-        // @todo catch error
-        .then(() => {
-          this.isDreaming = false
-        })
+    wakeUp (server) {
+      server.isChecking = false
+      server.isDreaming = false
     },
 
     /**
-     * Starts the next dream
+     * Stop Dreaming
+     *
      */
-    startNextDream (api, serverId) {
-      if (!this.queue.length) return
-      
-      // Get the next queued item
-      const queue = [...this.queue[0]]
-      let dream = queue.shift()
+    // stopDreaming () {
+    //   this.isWakingUp = true
 
-      if (!queue.length) {
-        this.queue.shift()
-      }
-    },
+    //   const api = axios.create({ baseURL: this.settings.servers[0].base })
+    //   api
+    //     .post('/api/predict', {
+    //       fn_index: 5,
+    //     })
+    //     // @todo catch error
+    //     .then(() => {
+    //       this.isDreaming = false
+    //     })
+    // },
 
     // @todo Add this as a generic prototype
     // @todo Let's revisit how we save after vuex upgrade
