@@ -37,38 +37,10 @@ export default function (/* { ssrContext } */) {
          * GPU servers
          */
         servers: [
-          'http://localhost:7860/'
+          {
+            base: 'http://localhost:7860/'
+          }
         ],
-      },
-
-      /**
-       * txt2Img
-       */
-      txt2Img: {
-        queue: [],
-        curDream: {},
-        tab: 'Images',
-
-        prompt: '',
-        defaultPrompt: 'a dr seuss illustration of robots building a city',
-        // @todo generate and persist this (and do we even need this?)
-        sessionHash: '3exs9au2lti',
-    
-        imgs: [],
-        width: 512,
-        height: 512,
-        steps: 40,
-    
-        isDreaming: false,
-        isStoppingDream: false,
-        dreamCheckInterval: 750, // milliseconds
-        dreamProgress: 0,
-    
-        numBatches: 1,
-        batchSize: 1,
-    
-        imageModal: false,
-        imageModalActiveImage: null,
       },
 
       /**

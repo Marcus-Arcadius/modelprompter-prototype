@@ -2,6 +2,7 @@
   "vetur.validation.template": false,
   "vetur.format.enable": false,
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "vue"],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   
   "vetur.experimental.templateInterpolationService": true
 }

@@ -14,6 +14,7 @@
 
 ## TL:DR;
 ```bash
+npm i -g @quasar/cli # see: https://quasar.dev/start/quasar-cli
 git clone https://github.com/everestwonder/diffusion-blocks
 cd diffusion-blocks
 npm install

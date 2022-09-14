@@ -4,18 +4,20 @@ q-page
     .q-gutter-y-md
       q-card
         q-card-section
-          q-tabs(v-model='txt2Img.tab' dense='' align='left' narrow-indicator='')
-            q-tab(name='Images' label='Images')
+          q-tabs(v-model='tab' dense='' align='left' narrow-indicator='')
+            q-tab(name='Images' label='Quick Prompt')
           q-separator
           //- Images tab
-          q-tab-panels(v-model='txt2Img.tab' animated='')
+          q-tab-panels(v-model='tab' animated='')
             q-tab-panel(name='Images')
               //- @todo Add random placeholders
-              q-input(v-model='txt2Img.prompt' label='Prompt' placeholder='a dr seuss illustration of robots building a city' autogrow @change='autosave')
+              q-input(v-model='prompt' label='Prompt' placeholder='a dr seuss illustration of robots building a city' autogrow @change='autosave')
                 template(v-slot:append='')
-                  q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='txt2Img.isStoppingDream' @click='maybeDream')
-                  q-btn(v-if='txt2Img.isDreaming || txt2Img.isStoppingDream' :disabled='txt2Img.isStoppingDream' :loading='txt2Img.isStoppingDream' color='negative' label='Stop' icon='cancel' @click='stopDreaming')
-              q-linear-progress.q-mt-md(size='20px' v-if='txt2Img.isDreaming || txt2Img.isStoppingDream' :value='txt2Img.dreamProgress' stripe='')
+                  q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='isStoppingDream' @click='queueDream')
+                    //- q-tooltip(v-if='!settings.server || !settings.server.length' content-class='bg-red' content-style='font-size: 1em')
+                    //-   | No servers selected
+                  q-btn(v-if='isDreaming || isStoppingDream' :disabled='isStoppingDream' :loading='isStoppingDream' color='negative' label='Stop' icon='cancel' @click='stopDreaming')
+              q-linear-progress.q-mt-md(size='20px' v-if='isDreaming || isStoppingDream' :value='dreamProgress' stripe='')
   .q-pa-md
     .q-col-gutter-md.row.items-start
       //- Config
@@ -23,31 +25,26 @@ q-page
         q-card
           q-card-section
             //- Basics
-            q-badge Steps: {{ txt2Img.steps }} 
-            q-slider(v-model='txt2Img.steps' :min='1' :max='150' :step='1' @change='autosave')
-            q-badge Width: {{ txt2Img.width }} 
-            q-slider(v-model='txt2Img.width' :min='64' :max='2048' :step='64' @change='autosave' snap='')
-            q-badge Height: {{ txt2Img.height }} 
-            q-slider(v-model='txt2Img.height' :min='64' :max='2048' :step='64' @change='autosave' snap='')
+            q-badge Steps: {{ steps }} 
+            q-slider(v-model='steps' :min='1' :max='150' :step='1' @change='autosave')
+            q-badge Width: {{ width }} 
+            q-slider(v-model='width' :min='64' :max='2048' :step='64' @change='autosave' snap='')
+            q-badge Height: {{ height }} 
+            q-slider(v-model='height' :min='64' :max='2048' :step='64' @change='autosave' snap='')
             //- Batches
-            .q-col-gutter-md.row.items-start.q-mt-lg
-              .col-6
-                q-badge Batches: {{ txt2Img.numBatches }} 
-                q-input(dense='' type='number' min='1' v-model.number='txt2Img.numBatches' @change='autosave')
-              .col-6
-                q-badge Batch Size: {{ txt2Img.batchSize }} 
-                q-input(dense='' type='number' min='1' v-model.number='txt2Img.batchSize' @change='autosave')
+            q-badge Batch Size: {{ batchSize }} 
+            q-input(dense='' type='number' min='1' v-model.number='batchSize' @change='autosave')
       //- Gallery
       .col-8
         .q-col-gutter-md.row.items-start
-          .col-4(v-for='(img, key) in txt2Img.imgs' :key='key')
+          .col-4(v-for='(img, key) in imgs' :key='key')
             q-card.cursor-pointer(@click='expandImage(img)')
               q-card-section.q-pa-sm
                 q-img(:src='img')
   //- Image Modal
-  q-dialog(v-model='txt2Img.imageModal')
+  q-dialog(v-model='imageModal')
     q-card.my-card(style='min-width: 300px')
-      q-img(:src='txt2Img.imageModalActiveImage' style='height: 300px')
+      q-img(:src='imageModalActiveImage' style='height: 300px')
       q-card-section
 </template>
 
@@ -58,85 +55,183 @@ import axios from 'axios'
 import {mapState} from 'vuex'
 import store from 'store'
 
+const autosaveFields = ['queue', 'tab', 'prompt', 'sessionHash', 'imgs', 'width', 'height', 'steps', 'batchSize']
+
 export default {
   name: 'IndexPage',
 
   computed: {
-    ...mapState(['txt2Img']),
     ...mapState(['settings']),
   },
 
   mounted () {
-    const text2Img = store.get('text2Img')
-    text2Img && this.$store.commit('set', ['txt2Img', text2Img])
+    // Handle autosave fields
+    const $onloadData = store.get('txt2Img') || {}
+    autosaveFields.forEach(key => {
+      // Load settings
+      if ($onloadData.hasOwnProperty(key)) {
+        this[key] = $onloadData[key]
+      }
+
+      // Add autosave watchers
+      this.$watch(key, this.autosave, {deep: true})
+    })
   },
+
+  data: () => ({
+    queue: [],
+    curDream: {},
+    tab: 'Images',
+    prompt: '',
+    // @todo add this to config
+    defaultPrompt: 'a dr seuss illustration of robots building a city',
+    // @todo generate and persist this (and do we even need this?)
+    sessionHash: '3exs9au2lti',
+
+    imgs: [],
+    width: 512,
+    height: 512,
+    steps: 40,
+
+    isDreaming: false,
+    isStoppingDream: false,
+    dreamCheckInterval: 750, // milliseconds
+    dreamProgress: 0,
+
+    numBatches: 1,
+    batchSize: 1,
+
+    imageModal: false,
+    imageModalActiveImage: null,
+  }),
   
   methods: {
-    maybeDream() {
-      if (!this.txt2Img.isDreaming) {
-        this.startDream()
+    /**
+     * Queues up the dream and runs them if able to
+     */
+    queueDream () {
+      // @todo We shouldn't need these conditionals,
+      // instead set defaults when loading store
+      if (!this.queue) {this.queue = []}
+
+      // Create the batch
+      const batch = []
+      for (let i = 0; i < this.batchSize; i++) {
+        // Remove extra fields
+        const data = Object.assign({}, this.txt2Img)
+        delete data.queue
+        batch.push(data)
       }
+      this.queue.push(...batch)
+
+      // Check and start the next dream
+      this.checkDream(this.startNextDream)
     },
 
     /**
      * Check dream
+     * @param awakeCb Callback to call if there are no dreams
      */
-    checkDream() {
-      const api = axios.create({ baseURL: this.settings.servers[0].base })
+    checkDream (awakeCb) {
+      // Exit if no servers
+      if (!this.settings.servers.length) {
+        this.$q.notify({
+          message: 'No servers selected. Set one in Settings',
+          position: 'top',
+          color: 'red'
+        })
+        return
+      }
+      
+      // Loop through each server and try to find an available one to run
+      let hasFoundAvailableServer = false
+      for (let serverId = 0; serverId < this.settings.servers.length; serverId++) {
+        const api = axios.create({ baseURL: this.settings.servers[serverId].base })
 
-      api
+        api
         .post('/api/predict', {
           fn_index: 4,
           data: [],
-          session_hash: this.txt2Img.sessionHash,
+          session_hash: this.sessionHash,
         })
         .then((response) => {
           const data = response.data.data[0]
 
-          const $dom = document.createElement('div')
-          $dom.innerHTML = data
-          const $width = $dom.querySelector('.progress')
+          // Checking to run
+          // If a server is available, start the dream. Otherwise wait a bit and check again
+          if (awakeCb) {
+            if (!data.isGenerating) {
+              !hasFoundAvailableServer && this.startNextDream(api, serverId)
+              hasFoundAvailableServer = true
+            } else {
+              if (!hasFoundAvailableServer) {
+                setTimeout(() => this.checkDream(awakeCb), this.dreamCheckInterval)
+              }
+            }
 
-          if ($width?.innerHTML) {
-            this.txt2Img.dreamProgress =
-              parseInt($width.innerHTML.replace('%', '')) / 100
+          // Checking to get percent
           } else {
-            this.txt2Img.dreamProgress = 0
-          }
 
-          if (this.txt2Img.isDreaming) {
-            setTimeout(() => {
-              this.checkDream()
-            }, this.dreamCheckInterval)
+            // If we're dreaming, update the progress instead
+            // @todo handle multiple dreams
+            if (data.isGenerating) {
+  
+              // Create a dummy DOM to extract the progress
+              const $dom = document.createElement('div')
+              $dom.innerHTML = data
+              const $width = $dom.querySelector('.progress')
+  
+              // Update progress in UI
+              if ($width?.innerHTML) {
+                this.dreamProgress =
+                  parseInt($width.innerHTML.replace('%', '')) / 100
+              } else {
+                this.dreamProgress = 0
+              }
+  
+              // Check the dream again
+              if (this.isDreaming) {
+                setTimeout(() => {
+                  this.checkDream()
+                }, this.dreamCheckInterval)
+              }
+            }
           }
         })
-      // @todo Add error message
+        .catch(err => {
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: `Error checking dream: ${err}`,
+            icon: 'report_problem',
+          })
+        })
+      }
     },
 
     /**
      * Starts the dream and occasionally checks in to update progress
      */
-    startDream () {
-      console.log(this, this.settings.servers)
-      this.txt2Img.isDreaming = true
+    startDream (api) {
+      this.isDreaming = true
 
       setTimeout(() => {
         this.checkDream()
       }, 0)
-      // https://29390.gradio.app
-      const api = axios.create({ baseURL: this.settings.servers[0].base })
+
+      // example: https://29390.gradio.app
       api
         .post('/api/predict', {
           fn_index: 3,
           data: [
             // @todo make this configurable
-            this.txt2Img.prompt || this.txt2Img.defaultPrompt,
+            this.prompt || this.defaultPrompt,
             // negative_prompt
             '',
             // txt2img_prompt_style
             'None',
             // init_img
-            this.txt2Img.steps,
+            this.steps,
             // sampler_index
             'Euler a',
             // restore_faces
@@ -144,9 +239,9 @@ export default {
             // tiling
             false,
             // batch_count
-            this.txt2Img.numBatches,
+            this.numBatches,
             // batch_size
-            this.txt2Img.batchSize,
+            this.batchSize,
             // cfg_scale
             7,
             // seed
@@ -159,8 +254,8 @@ export default {
             0,
             // seed_resize_from_w
             0,
-            this.txt2Img.height,
-            this.txt2Img.width,
+            this.height,
+            this.width,
 
             // Custom inputs
             'None',
@@ -173,44 +268,50 @@ export default {
             '',
             '',
           ],
-          session_hash: this.txt2Img.sessionHash,
+          session_hash: this.sessionHash,
         })
         .then((response) => {
-          // Clean data
-          const data = []
-          response.data.data.forEach((val) => {
-            data.push(val)
-          })
+          // // Clean data
+          // const data = []
+          // response.data.data.forEach((val) => {
+          //   data.push(val)
+          // })
+          // console.log('RESPONSE', data, response)
 
-          const imgs = []
-          data[0].forEach((img) => {
-            imgs.push(img)
-          })
+          // const imgs = []
+          // data[0].forEach((img) => {
+          //   imgs.push(img)
+          // })
 
-          this.txt2Img.imgs.push(...imgs)
-          this.txt2Img.status = data[1]
+          // this.imgs.push(...imgs)
+          // this.status = data[1]
+
+          // // Run next in queue
+          // this.queue.unshift()
+          // if (this.queue.length) {
+          //   console.log('test', this.queue)
+          // }
         })
         .finally(() => {
-          this.txt2Img.isDreaming = false
-          this.txt2Img.isStoppingDream = false
+          this.isDreaming = false
+          this.isStoppingDream = false
         })
-      // @todo catch error
-      // .catch(() => {
-      //   this.$q.notify({
-      //     color: 'negative',
-      //     position: 'top',
-      //     message: 'Loading failed',
-      //     icon: 'report_problem',
-      //   })
-      // })
+        .catch((err) => {
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: `Prompting failed: ${err}`,
+            icon: 'report_problem',
+          })
+        })
     },
 
     /**
      * Stop Dreaming
      *
      */
-    stopDreaming() {
-      this.txt2Img.isStoppingDream = true
+    stopDreaming () {
+      this.isStoppingDream = true
 
       const api = axios.create({ baseURL: this.settings.servers[0].base })
       api
@@ -219,25 +320,39 @@ export default {
         })
         // @todo catch error
         .then(() => {
-          this.txt2Img.isDreaming = false
+          this.isDreaming = false
         })
+    },
+
+    /**
+     * Starts the next dream
+     */
+    startNextDream (api, serverId) {
+      if (!this.queue.length) return
+      
+      // Get the next queued item
+      const queue = [...this.queue[0]]
+      let dream = queue.shift()
+
+      if (!queue.length) {
+        this.queue.shift()
+      }
     },
 
     // @todo Add this as a generic prototype
     // @todo Let's revisit how we save after vuex upgrade
-    autosave() {
-      const opts = ['tab', 'prompt', 'defaultPrompt', 'sessionHash', 'imgs', 'width', 'height', 'steps', 'isDreaming', 'isStoppingDream', 'dreamCheckInterval', 'dreamProgress', 'numBatches', 'batchSize', 'imageModal', 'imageModalActiveImage']
+    // @todo 🚨 This should be throttled
+    autosave () {
       const data = {}
-      opts.forEach((key) => {
-        data[key] = this.txt2Img[key]
+      autosaveFields.forEach(key => {
+        data[key] = this[key]
       })
-
-      store.set('text2Img', data)
+      store.set('txt2Img', data)
     },
 
-    expandImage(ev) {
-      this.txt2Img.imageModal = true
-      this.txt2Img.imageModalActiveImage = ev
+    expandImage (ev) {
+      this.imageModal = true
+      this.imageModalActiveImage = ev
     },
   },
 }
