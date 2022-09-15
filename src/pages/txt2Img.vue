@@ -15,6 +15,7 @@ q-page
                 q-input(v-model='prompt' label='Prompt' placeholder='a dr seuss illustration of robots building a city' autogrow @change='autosave')
                   template(v-if='$q.screen.gt.xs' v-slot:append='')
                     q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
+                    q-btn.q-ml-md(v-if='isDreaming' icon='stop' color='red' label='Stop All' @click='stopAll')
                 q-btn.full-width.q-mt-md(v-if='$q.screen.lt.sm' color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
               template(v-for='server in servers')
                 template(v-if='server.isChecking || server.isDreaming || server.isWakingUp || server.isStopping')
@@ -26,6 +27,7 @@ q-page
                         span(style='position: absolute; width: 100%; text-align: center; color: #fff; display: block; font-size: .8em')
                     div(style='flex: 0 0 120px')
                       q-btn.q-ml-md(style='height: 100%' color='negative' width='100px' icon='cancel' label='stop' @click='stopServer(server)' :loading='server.isStopping' :disabled='server.isStopping')
+
   .q-pa-md
     .q-col-gutter-md.row.items-start
       //- Config
@@ -49,6 +51,7 @@ q-page
             q-card.cursor-pointer(@click='expandImage(img)')
               q-card-section.q-pa-sm
                 q-img(:src='img')
+
   //- Image Modal
   q-dialog(v-model='imageModal')
     q-card.my-card(style='min-width: 300px')
@@ -434,7 +437,17 @@ export default {
       }
       
       return data
-    }    
+    },
+    
+    /**
+     * Stopp all servers and clear the queue
+     */
+    stopAll () {
+      this.servers.forEach(server => {
+        this.stopServer(server)
+      })
+      this.queue = []
+    }
   },
 }
 </script>
