@@ -50,15 +50,16 @@ q-page
           .col-xs-12.col-sm-6.col-md-4.col-lg-3(v-for='(img, key) in imgs' :key='key')
             q-card.cursor-pointer(@click='expandImage(img)')
               q-card-section.q-pa-sm
-                q-img(:src='img.src')
+                q-img(native-context-menu :src='img.src')
               q-card-actions(align='right')
                 q-btn(flat round color='negative' icon='delete' @click='deleteImage($event, img)')
                 q-space
+                q-btn(flat round color='secondary' icon='save' @click='downloadImage($event, img)')
 
   //- Image Modal
   q-dialog(v-model='imageModal')
     q-card(style='min-width: 300px')
-      q-img(:src='imageModalActiveImage.src' :style='{width: imageModalActiveImage.width, height: imageModalActiveImage.height}')
+      q-img(native-context-menu :src='imageModalActiveImage.src' :style='{width: imageModalActiveImage.width, height: imageModalActiveImage.height}')
       q-card-section
         pre(style='font-size:1.15em') {{imageModalActiveImage.server.dream.prompt}}
         table
@@ -74,6 +75,7 @@ q-page
       q-card-actions(align='right')
           q-btn(flat round color='negative' icon='delete' @click='deleteImage($event, imageModalActiveImage)')
           q-space
+          q-btn(flat round color='secondary' icon='save' @click='downloadImage($event, imageModalActiveImage)')
 </template>
 
 
@@ -535,6 +537,36 @@ export default {
       })
 
       this.imgs.splice(idxToRemove, 1)
+
+      this.autosave()
+    },
+
+    /**
+     * Downloads the image as PNG
+     * @param {*} ev 
+     * @param {*} img 
+     */
+    downloadImage (ev, img) {
+      ev.stopPropagation()
+
+      const a = document.createElement('a')
+      a.href = img.src
+
+      let filename = img.server.dream.prompt.substr(0, 300)
+      filename = filename.replace(/\s/g, '_')
+      filename = filename.replace(/\W/g, '')
+
+      const date = new Date()
+        .getFullYear()
+          + '-' + ('0' + (new Date().getMonth() + 1)).slice(-2)
+          + '-' + ('0' + new Date().getDate()).slice(-2)
+
+      a.download = `${date + '---' + filename}.png`
+      a.click()
+
+      this.$nextTick(() => {
+        a.remove()
+      })
     }
   },
 }
