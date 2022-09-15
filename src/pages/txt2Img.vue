@@ -14,13 +14,13 @@ q-page
               q-input(v-model='prompt' label='Prompt' placeholder='a dr seuss illustration of robots building a city' autogrow @change='autosave')
                 template(v-slot:append='')
                   q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
-              template(v-for='server in settings.servers')
+              template(v-for='server in servers')
                 template(v-if='server.isChecking || server.isDreaming || server.isWakingUp')
                   .flex.q-mt-md
                     div
                       q-linear-progress(style='flex: 1' dense color='blue' size='20px' :value='+(server.dreamProgress)/100' stripe='')
                         span(style='position: absolute; width: 100%; text-align: center; color: #fff; display: block; font-size: .65em') {{server.base}}
-                      q-linear-progress.q-mt-sm(color='negative' size='10px' :value='settings.servers.length/(settings.servers.length+queue.length)')
+                      q-linear-progress.q-mt-sm(color='negative' size='10px' :value='servers.length/(servers.length+queue.length)')
                         span(style='position: absolute; width: 100%; text-align: center; color: #fff; display: block; font-size: .8em')
                     div(style='flex: 0 0 120px')
                       q-btn.q-ml-md(style='height: 100%' color='negative' width='100px' icon='cancel' label='stop' @click='stopServer(server)')
@@ -70,12 +70,16 @@ export default {
   computed: {
     ...mapState(['settings']),
 
+    servers: function () {
+      return this.settings.servers.filter(server => server.enabled)
+    },
+
     isDreaming: function () {
-      return this.settings.servers.some(server => server.isDreaming)
+      return this.servers.some(server => server.isDreaming)
     },
 
     isWakingUp: function () {
-      return this.settings.servers.some(server => server.isWakingUp)
+      return this.servers.some(server => server.isWakingUp)
     },
 
     // @todo this smells like gefilte fish
@@ -83,7 +87,7 @@ export default {
       if (!this.queue.length) {
         return 1
       } else {
-        return this.settings.servers.length / this.queue.length
+        return this.servers.length / this.queue.length
       }
     }
   },
@@ -103,7 +107,7 @@ export default {
     })
 
     // Let's ping all servers on load to get current status
-    this.settings.servers.forEach(server => {
+    this.servers.forEach(server => {
       // Let's force-start checking
       server.isChecking = false
       
@@ -156,7 +160,7 @@ export default {
      */
     queueDream () {
       // Exit if no servers
-      if (!this.settings.servers.length) {
+      if (!this.servers.length) {
         this.$q.notify({
           message: 'No servers selected. Set one in Settings',
           position: 'top',
@@ -173,7 +177,7 @@ export default {
       this.queue.push(...batch)
 
       // Check and start the next dream
-      this.settings.servers.forEach(server => {
+      this.servers.forEach(server => {
         if (!server.isChecking) {
           // Loop through each server and try to find an available one to run
           const api = axios.create({ baseURL: server.base })

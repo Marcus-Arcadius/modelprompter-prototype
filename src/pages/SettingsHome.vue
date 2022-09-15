@@ -21,16 +21,13 @@ q-page.full-height
             q-tr(:props='props')
               //- Base
               td(key='base' :props='props')
-                | {{props.row.base}}
-                q-popup-edit(v-model='props.row.base' auto-save v-slot='scope')
-                  q-input(v-model='props.row.base' dense='' autofocus @keyup.enter='scope.set')
+                q-input(v-model='props.row.base' dense='' autofocus @keyup.enter='scope.set')
               //- API
               td(key='api' :props='props')
-                | {{props.row.api || '1.4' }}
-                q-popup-edit(v-model='props.row.base' auto-save v-slot='scope')
-                  q-select(v-model='props.row.api' :options='apiVersions' default='1.4' label='API')
-              
+                q-select(v-model='props.row.api' :options='apiVersions' default='1.4' label='API')
+              //- Actions
               q-td(key='actions' :props='props' v-if='settings.servers.length > 1')
+                q-toggle.q-mr-md(v-model='props.row.enabled' :label='props.row.enabled ? "Enabled" : "Disabled"' color='yellow')
                 q-btn(color='negative' icon='delete' @click='deleteRow(props)')
 </template>
 
@@ -68,7 +65,8 @@ export default {
     addRow () {
       this.settings.servers.push({
         base: '',
-        api: '1.5'
+        api: '1.5',
+        enabled: true
       })
     },
 
