@@ -248,7 +248,16 @@ export default {
           color: 'negative',
           position: 'top',
           multiLine: true,
-          message: `${server.base} -- ${err} -- Is the API right?`,
+          message: `${server.base} -- ${err}`,
+          actions: [
+            {
+              label: 'Check servers',
+              color: 'white',
+              handler: () => {
+                this.$router.push({path: '/settings'})
+              }
+            }
+          ],
           icon: 'report_problem',
         })
         server.isDreaming = false

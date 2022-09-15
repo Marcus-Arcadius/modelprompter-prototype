@@ -14,12 +14,22 @@
 
 ## TL:DR;
 ```bash
-npm i -g @quasar/cli # see: https://quasar.dev/start/quasar-cli
+# Clone this project
+npm i -g @quasar/cli  # see: https://quasar.dev/start/quasar-cli
 git clone https://github.com/everestwonder/diffusion-blocks
 cd diffusion-blocks
+
+# Install UI dependencies
 npm install
-npm start
-# Point your browser to http://localhost:8080
+npm start            # Point your browser to http://localhost:8080
+
+
+# (optional) Install local Stable Diffusion server
+git submodule update --init
+git pull --recurse-submodules
+cd server               # See readme for further instruction
+cd ..
+npm run dream-server    # See package.json for other server options
 ```
 
 
