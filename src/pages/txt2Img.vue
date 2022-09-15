@@ -11,9 +11,11 @@ q-page
           q-tab-panels(v-model='tab' animated='')
             q-tab-panel(name='Images')
               //- @todo Add random placeholders
-              q-input(v-model='prompt' label='Prompt' placeholder='a dr seuss illustration of robots building a city' autogrow @change='autosave')
-                template(v-slot:append='')
-                  q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
+              div
+                q-input(v-model='prompt' label='Prompt' placeholder='a dr seuss illustration of robots building a city' autogrow @change='autosave')
+                  template(v-if='$q.screen.gt.xs' v-slot:append='')
+                    q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
+                q-btn.full-width.q-mt-md(v-if='$q.screen.lt.sm' color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
               template(v-for='server in servers')
                 template(v-if='server.isChecking || server.isDreaming || server.isWakingUp')
                   .flex.q-mt-md
@@ -27,7 +29,7 @@ q-page
   .q-pa-md
     .q-col-gutter-md.row.items-start
       //- Config
-      .col-4
+      .col-xs-12.col-sm-6.col-md-4
         q-card
           q-card-section
             //- Basics
@@ -41,9 +43,9 @@ q-page
             q-badge Batch Size: {{ batchSize }} 
             q-input(dense='' type='number' min='1' v-model.number='batchSize' @change='autosave')
       //- Gallery
-      .col-8
+      .col-xs-12.col-sm-6.col-md-8
         .q-col-gutter-md.row.items-start
-          .col-4(v-for='(img, key) in imgs' :key='key')
+          .col-xs-12.col-sm-6.col-md-4.col-lg-3(v-for='(img, key) in imgs' :key='key')
             q-card.cursor-pointer(@click='expandImage(img)')
               q-card-section.q-pa-sm
                 q-img(:src='img')
