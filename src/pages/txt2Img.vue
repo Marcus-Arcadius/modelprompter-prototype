@@ -90,6 +90,7 @@ export default {
 
   mounted () {
     globalThis.a = this
+
     // Handle autosave fields
     const $onloadData = store.get('txt2Img') || {}
     autosaveFields.forEach(key => {
@@ -97,7 +98,6 @@ export default {
       if ($onloadData.hasOwnProperty(key)) {
         this[key] = $onloadData[key]
       }
-
       // Add autosave watchers
       this.$watch(key, this.autosave, {deep: true})
     })
@@ -109,7 +109,6 @@ export default {
       
       // @todo Use a method instead of axios.create directly incase of update
       const api = axios.create({baseURL: server.base})
-
       this.checkDream(server, api)
     })
   },
@@ -209,18 +208,19 @@ export default {
         } else {
           server.isDreaming = false
         }
+        // console.log('isChecking', server.base, response.data.data[0])
 
         // If we're dreaming, update the progress
         // @todo handle multiple dreams
-        if (server.isDreaming || response.data.isGenerating) {
+        if (data) {
           // Create a dummy DOM to extract the progress
           const $dom = document.createElement('div')
           $dom.innerHTML = data
           const $width = $dom.querySelector('.progress')
 
           // Update progress in UI
-          if ($width?.innerHTML) {
-            server.dreamProgress = parseInt($width.innerHTML.replace('%', ''))
+          if ($width) {
+            server.dreamProgress = parseInt($width.style.width.replace('%', ''))
           } else {
             server.dreamProgress = 0
           }
@@ -239,10 +239,8 @@ export default {
             this.$forceUpdate()
           })
         // Otherwise start dreaming if not dreaming
-        } else if (!server.isDreaming && this.queue.length) {
+        } else if (!server.isDreaming) {
           this.startDream(server, api)
-        // Otherwise just chill
-        } else {
         }
       })
       .catch(err => {
@@ -270,7 +268,8 @@ export default {
       
       // Start checking for progress
       server.isDreaming = true
-      server.progress = 0
+      server.isChecking = true
+      server.dreamProgress = 0
       this.$nextTick(() => {
         this.$forceUpdate()
 
@@ -314,6 +313,9 @@ export default {
 
           // Run next in queue
           this.wakeUp(server, api)
+          if (this.queue.length) {
+            this.startDream(server, api)
+          }
         })
         .catch((err) => {
           this.$q.notify({
@@ -332,10 +334,6 @@ export default {
     wakeUp (server, api) {
       server.isChecking = false
       server.isDreaming = false
-
-      if (this.queue.length) {
-        this.startDream(server, api)
-      }
 
       this.$nextTick(() => {
         this.$forceUpdate()
