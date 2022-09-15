@@ -17,7 +17,7 @@ q-page
                     q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
                 q-btn.full-width.q-mt-md(v-if='$q.screen.lt.sm' color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
               template(v-for='server in servers')
-                template(v-if='server.isChecking || server.isDreaming || server.isWakingUp')
+                template(v-if='server.isChecking || server.isDreaming || server.isWakingUp || server.isStopping')
                   .flex.q-mt-md
                     div
                       q-linear-progress(style='flex: 1' dense color='blue' size='20px' :value='+(server.dreamProgress)/100' stripe='')
@@ -25,7 +25,7 @@ q-page
                       q-linear-progress.q-mt-sm(color='negative' size='10px' :value='servers.length/(servers.length+queue.length)')
                         span(style='position: absolute; width: 100%; text-align: center; color: #fff; display: block; font-size: .8em')
                     div(style='flex: 0 0 120px')
-                      q-btn.q-ml-md(style='height: 100%' color='negative' width='100px' icon='cancel' label='stop' @click='stopServer(server)')
+                      q-btn.q-ml-md(style='height: 100%' color='negative' width='100px' icon='cancel' label='stop' @click='stopServer(server)' :loading='server.isStopping' :disabled='server.isStopping')
   .q-pa-md
     .q-col-gutter-md.row.items-start
       //- Config
@@ -201,7 +201,7 @@ export default {
       .post('/api/predict', {
         fn_index: 4,
         data: [],
-        session_hash: this.sessionHash,
+        session_hash: 'wnjumdy1m18',
       })
       .then((response) => {
         const data = response.data.data[0]
@@ -213,6 +213,7 @@ export default {
           server.isChecking = true
         } else {
           server.isDreaming = false
+          server.isStopping = false
         }
         // console.log('isChecking', server.base, response.data.data[0])
 
@@ -299,7 +300,7 @@ export default {
         .post('/api/predict', {
           fn_index: 3,
           data: this.prepareData(data, server),
-          session_hash: this.sessionHash,
+          session_hash: 'wnjumdy1m18',
         })
         .then((response) => {
           // Clean data
@@ -321,7 +322,7 @@ export default {
             this.$q.notify({
               color: 'negative',
               position: 'top',
-              message: 'No images generated',
+              message: `${server.base} -- No images generated`,
               icon: 'report_problem'
             })
           }
@@ -336,7 +337,7 @@ export default {
           this.$q.notify({
             color: 'negative',
             position: 'top',
-            message: `Prompting failed: ${err}`,
+            message: `${server.base} -- Prompting failed: ${err}`,
             icon: 'report_problem',
           })
           console.log(err)
@@ -357,19 +358,17 @@ export default {
 
     stopServer (server) {
       const api = axios.create({baseURL: server.base})
+      server.isStopping = true
+
       api
         .post('/api/predict', {
           fn_index: 5,
-        })
-        // @todo catch error
-        .then(() => {
-          this.wakeUp(server, api)
         })
         .catch((err) => {
           this.$q.notify({
             color: 'negative',
             position: 'top',
-            message: `Stopping txt2Img failed: ${err}`,
+            message: `${server.base} -- Stopping txt2Img failed: ${err}`,
             icon: 'report_problem',
           })
         })
@@ -398,9 +397,9 @@ export default {
       let data, promptDictionary, defaults
 
       // Select statement based on data api
-      switch (server.api || '1.4') {
+      switch (server.api || '1') {
         // @see https://github.com/AUTOMATIC1111/stable-diffusion-webui
-        case '1.4':
+        case 'AUTOMATIC1111-1':
           data = []
           promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', '', '', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
           // promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', 'numBatches', 'batchSize', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
@@ -417,11 +416,11 @@ export default {
         break
         
         // @see https://github.com/AUTOMATIC1111/stable-diffusion-webui
-        case '1.5':
+        case 'AUTOMATIC1111-2':
           data = []
           promptDictionary = ['prompt', 'negative', '', '', 'steps', '', '', '', '', '', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '', '']
           // promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', 'numBatches', 'batchSize', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
-          defaults = [context.defaultPrompt, '', 'None', 'None', 40, 'Euler a', false, false, 1, 1, 7, -1, -1, 0, 0, 0, context.height, context.width, 'None', null, 'Seed', '', 'Steps', '', true, false, []]
+          defaults = [context.defaultPrompt, '', 'None', 'None', 40, 'Euler a', false, false, 1, 1, 7, -1, -1, 0, 0, 0, context.height, context.width, 'None', false, 'Seed', '', 'Steps', '', true, null, [], '', '']
         
           // Build the data fro the given dictionary and defaults
           promptDictionary.forEach((key, n) => {

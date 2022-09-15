@@ -74,7 +74,7 @@ export default {
       { name: 'actions', align: 'left', label: 'Actions' },
     ],
 
-    apiVersions: ['1.4', '1.5']
+    apiVersions: ['AUTOMATIC1111-1', 'AUTOMATIC1111-2']
   }),
 
   methods: {
