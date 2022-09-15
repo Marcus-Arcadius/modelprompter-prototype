@@ -50,13 +50,24 @@ q-page
           .col-xs-12.col-sm-6.col-md-4.col-lg-3(v-for='(img, key) in imgs' :key='key')
             q-card.cursor-pointer(@click='expandImage(img)')
               q-card-section.q-pa-sm
-                q-img(:src='img')
+                q-img(:src='img.src')
 
   //- Image Modal
   q-dialog(v-model='imageModal')
     q-card.my-card(style='min-width: 300px')
-      q-img(:src='imageModalActiveImage' style='height: 300px')
+      q-img(:src='imageModalActiveImage.src' :style='{width: imageModalActiveImage.width, height: imageModalActiveImage.height}')
       q-card-section
+        pre(style='font-size:1.15em') {{imageModalActiveImage.server.dream.prompt}}
+        table
+          tr 
+            td width
+            td {{imageModalActiveImage.width}}px
+          tr 
+            td height
+            td {{imageModalActiveImage.height}}px
+          tr 
+            td steps
+            td {{imageModalActiveImage.server.dream.steps}}
 </template>
 
 
@@ -65,8 +76,11 @@ q-page
 import axios from 'axios'
 import {mapState} from 'vuex'
 import store from 'store'
+import {cloneDeep} from 'lodash-es'
 
-const autosaveFields = ['queue', 'tab', 'prompt', 'sessionHash', 'lastImg', 'width', 'height', 'steps', 'batchSize']
+const autosaveFields = [
+  'imgs', // Only during testing!
+  'queue', 'tab', 'prompt', 'sessionHash', 'lastImg', 'width', 'height', 'steps', 'batchSize']
 const promptFields = {prompt: null, negative: null, sessionHash: null, width: null, height: null, steps: null, numBatches: null, batchSize: null}
 
 export default {
@@ -147,7 +161,14 @@ export default {
     totalBatched: 0,
 
     imageModal: false,
-    imageModalActiveImage: null,
+    imageModalActiveImage: {
+      src: '',
+      width: 0,
+      height: 0,
+      server: {
+        dream: {}
+      }
+    },
   }),
   
   methods: {
@@ -169,7 +190,16 @@ export default {
         this.$q.notify({
           message: 'No servers selected. Set one in Settings',
           position: 'top',
-          color: 'red'
+          color: 'red',
+          actions: [
+            {
+              label: 'Check servers',
+              color: 'white',
+              handler: () => {
+                this.$router.push({path: '/settings'})
+              }
+            }
+          ],
         })
         return
       }
@@ -298,11 +328,15 @@ export default {
       })
 
       // Actuall start dream
-      const data = this.queue.shift()
+      const dream = this.queue.shift()
+      dream.prompt = dream.prompt || dream.defaultPrompt
+      server.dream = dream
+      const $server = cloneDeep(server)
+
       api
         .post('/api/predict', {
           fn_index: 3,
-          data: this.prepareData(data, server),
+          data: this.prepareData($server.dream, $server),
           session_hash: 'wnjumdy1m18',
         })
         .then((response) => {
@@ -312,10 +346,26 @@ export default {
             data.push(val)
           })
 
-          // Add the image to the queue
+          // Gets the image size and adds it to the queue
           if (data[0]) {
             const imgs = []
-            data[0].forEach((img) => {
+            data[0].forEach(img => {
+              const $img = new Image()
+              img = {
+                src: img,
+                width: 0,
+                height: 0
+              }
+              img.server = Object.assign({}, $server)
+
+              // Load the image to get the dimensions
+              $img.onload = () => {
+                img.width = $img.width
+                img.height = $img.height
+                $img.remove()
+              }
+              $img.src = img.src
+
               imgs.unshift(img)
             })
 
@@ -325,22 +375,22 @@ export default {
             this.$q.notify({
               color: 'negative',
               position: 'top',
-              message: `${server.base} -- No images generated`,
+              message: `${$server.base} -- No images generated`,
               icon: 'report_problem'
             })
           }
 
           // Run next in queue
-          this.wakeUp(server, api)
+          this.wakeUp($server, api)
           if (this.queue.length) {
-            this.startDream(server, api)
+            this.startDream($server, api)
           }
         })
         .catch((err) => {
           this.$q.notify({
             color: 'negative',
             position: 'top',
-            message: `${server.base} -- Prompting failed: ${err}`,
+            message: `${$server.base} -- Prompting failed: ${err}`,
             icon: 'report_problem',
           })
           console.log(err)
@@ -353,6 +403,7 @@ export default {
     wakeUp (server, api) {
       server.isChecking = false
       server.isDreaming = false
+      server.dream = {}
 
       this.$nextTick(() => {
         this.$forceUpdate()

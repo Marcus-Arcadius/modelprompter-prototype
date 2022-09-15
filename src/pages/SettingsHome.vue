@@ -28,7 +28,7 @@ q-page.full-height
               q-td(key='api' :props='props')
                 q-select(v-model='props.row.api' :options='apiVersions' default='1.4' label='API')
               //- Actions
-              q-td(key='actions' :props='props' v-if='settings.servers.length > 1')
+              q-td(key='actions' :props='props')
                 q-toggle.q-mr-md(v-model='props.row.enabled' :label='props.row.enabled ? "Enabled" : "Disabled"' color='yellow')
                 q-btn(color='negative' icon='delete' @click='deleteRow(props)')
           //- Responsive
@@ -81,7 +81,7 @@ export default {
     addRow () {
       this.settings.servers.push({
         base: '',
-        api: '1.5',
+        api: 'AUTOMATIC1111-2',
         enabled: true
       })
     },

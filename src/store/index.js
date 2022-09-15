@@ -38,7 +38,11 @@ export default function (/* { ssrContext } */) {
          */
         servers: [
           {
-            base: 'http://localhost:7860/'
+            base: 'http://localhost:7860/',
+            width: 0,
+            height: 0,
+            enabled: true,
+            api: 'AUTOMATIC1111-2'
           }
         ],
       },
