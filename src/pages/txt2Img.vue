@@ -447,6 +447,7 @@ export default {
         this.stopServer(server)
       })
       this.queue = []
+      this.autosave()
     }
   },
 }
