@@ -16,8 +16,15 @@ q-page
                   q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
                   q-btn(v-if='isDreaming || isWakingUp' :disabled='isWakingUp' :loading='isWakingUp' color='negative' label='Stop' icon='cancel' @click='stopDreaming')
               template(v-for='server in settings.servers')
-                q-linear-progress.q-mt-md(dense color='blue' size='20px' v-if='server.isDreaming || server.isWakingUp' :value='+(server.dreamProgress)/100' stripe='')
-                  span(style='position: absolute; width: 100%; text-align: center; color: #fff; display: block; font-size: .65em') {{server.base}}
+                template(v-if='server.isChecking || server.isDreaming || server.isWakingUp')
+                  .flex.q-mt-md
+                    div
+                      q-linear-progress(style='flex: 1' dense color='blue' size='20px' :value='+(server.dreamProgress)/100' stripe='')
+                        span(style='position: absolute; width: 100%; text-align: center; color: #fff; display: block; font-size: .65em') {{server.base}}
+                      q-linear-progress.q-mt-sm(color='negative' size='10px' :value='settings.servers.length/(1+queue.length)')
+                        span(style='position: absolute; width: 100%; text-align: center; color: #fff; display: block; font-size: .8em')
+                    div(style='flex: 0 0 120px')
+                      q-btn.q-ml-md(style='height: 100%' color='negative' width='100px' icon='cancel' label='stop' @click='stopServer(server)')
   .q-pa-md
     .q-col-gutter-md.row.items-start
       //- Config
@@ -55,7 +62,7 @@ import axios from 'axios'
 import {mapState} from 'vuex'
 import store from 'store'
 
-const autosaveFields = ['tab', 'prompt', 'sessionHash', 'imgs', 'width', 'height', 'steps', 'batchSize']
+const autosaveFields = ['queue', 'tab', 'prompt', 'sessionHash', 'lastImg', 'width', 'height', 'steps', 'batchSize']
 
 /**
  * Converts data into a format for specific Stable Diffusion apis
@@ -97,6 +104,15 @@ export default {
     isWakingUp: function () {
       return this.settings.servers.some(server => server.isWakingUp)
     },
+
+    // @todo this smells like gefilte fish
+    overallProgress: function () {
+      if (!this.queue.length) {
+        return 1
+      } else {
+        return this.settings.servers.length / this.queue.length
+      }
+    }
   },
 
   mounted () {
@@ -111,11 +127,21 @@ export default {
       // Add autosave watchers
       this.$watch(key, this.autosave, {deep: true})
     })
+
+    // Let's ping all servers on load to get current status
+    this.settings.servers.forEach(server => {
+      // Let's force-start checking
+      server.isChecking = false
+      
+      // @todo Use a method instead of axios.create directly incase of update
+      const api = axios.create({baseURL: server.base})
+
+      this.checkDream(server, api)
+    })
   },
 
   data: () => ({
     queue: [],
-    curDream: {},
     tab: 'Images',
     prompt: '',
     negative: '',
@@ -125,6 +151,7 @@ export default {
     // @todo generate and persist this (and do we even need this?)
     sessionHash: '3exs9au2lti',
 
+    lastImg: {},
     imgs: [],
     width: 512,
     height: 512,
@@ -134,6 +161,8 @@ export default {
 
     numBatches: 1,
     batchSize: 1,
+
+    totalBatched: 0,
 
     imageModal: false,
     imageModalActiveImage: null,
@@ -171,12 +200,16 @@ export default {
           this.checkDream(server, api)
         }
       })
+
+      // Save the queue to localstorage
+      this.autosave()
     },
 
     /**
      * Check dream
      */
     checkDream (server, api) {
+      console.log('checking dream...', server)
       api
       .post('/api/predict', {
         fn_index: 4,
@@ -186,6 +219,14 @@ export default {
       .then((response) => {
         const data = response.data.data[0]
         server.lastResponse = data
+
+        // Pick up from where we left off
+        if (data) {
+          server.isDreaming = true
+          server.isChecking = true
+        } else {
+          server.isDreaming = false
+        }
 
         // If we're dreaming, update the progress
         // @todo handle multiple dreams
@@ -215,9 +256,11 @@ export default {
           this.$nextTick(() => {
             this.$forceUpdate()
           })
-        // Otherwise start dreaming
+        // Otherwise start dreaming if not dreaming
+        } else if (!server.isDreaming && this.queue.length) {
+          this.startDream(server, api)
+        // Otherwise just chill
         } else {
-          !server.isDreaming && this.startDream(server, api)
         }
       })
       .catch(err => {
@@ -234,7 +277,9 @@ export default {
      * Starts the dream and occasionally checks in to update progress
      */
     startDream (server, api) {
-      if (!this.queue.length) return
+      if (!this.queue.length) {
+        return
+      }
       
       // Start checking for progress
       server.isDreaming = true
@@ -268,6 +313,7 @@ export default {
           })
 
           this.imgs.unshift(...imgs)
+          this.lastImg = this.imgs[this.imgs.length-1]
 
           // Run next in queue
           this.wakeUp(server)
@@ -289,25 +335,30 @@ export default {
     wakeUp (server) {
       server.isChecking = false
       server.isDreaming = false
+      this.$nextTick(() => {
+        this.$forceUpdate()
+      })
     },
 
-    /**
-     * Stop Dreaming
-     *
-     */
-    // stopDreaming () {
-    //   this.isWakingUp = true
-
-    //   const api = axios.create({ baseURL: this.settings.servers[0].base })
-    //   api
-    //     .post('/api/predict', {
-    //       fn_index: 5,
-    //     })
-    //     // @todo catch error
-    //     .then(() => {
-    //       this.isDreaming = false
-    //     })
-    // },
+    stopServer (server) {
+      const api = axios.create({baseURL: server.base})
+      api
+        .post('/api/predict', {
+          fn_index: 5,
+        })
+        // @todo catch error
+        .then(() => {
+          this.wakeUp(server)
+        })
+        .catch((err) => {
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: `Stopping txt2Img failed: ${err}`,
+            icon: 'report_problem',
+          })
+        })
+    },
 
     // @todo Add this as a generic prototype
     // @todo Let's revisit how we save after vuex upgrade
