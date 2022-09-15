@@ -19,10 +19,16 @@ q-page.full-height
           //- Rows with inline-edit
           template(v-slot:body='props')
             q-tr(:props='props')
+              //- Base
               td(key='base' :props='props')
                 | {{props.row.base}}
                 q-popup-edit(v-model='props.row.base' auto-save v-slot='scope')
                   q-input(v-model='props.row.base' dense='' autofocus @keyup.enter='scope.set')
+              //- API
+              td(key='api' :props='props')
+                | {{props.row.api || '1.4' }}
+                q-popup-edit(v-model='props.row.base' auto-save v-slot='scope')
+                  q-select(v-model='props.row.api' :options='apiVersions' default='1.4' label='API')
               
               q-td(key='actions' :props='props' v-if='settings.servers.length > 1')
                 q-btn(color='negative' icon='delete' @click='deleteRow(props)')
@@ -51,13 +57,19 @@ export default {
   data: () => ({
     columns: [
       { name: 'base', align: 'left', field: 'base', label: 'Base URL' },
+      { name: 'api', align: 'left', field: 'api', label: 'API'},
       { name: 'actions', align: 'left', label: 'Actions' },
     ],
+
+    apiVersions: ['1.4', '1.5']
   }),
 
   methods: {
     addRow () {
-      this.settings.servers.push({ base: '' })
+      this.settings.servers.push({
+        base: '',
+        api: '1.5'
+      })
     },
 
     deleteRow (props) {

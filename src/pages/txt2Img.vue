@@ -14,14 +14,13 @@ q-page
               q-input(v-model='prompt' label='Prompt' placeholder='a dr seuss illustration of robots building a city' autogrow @change='autosave')
                 template(v-slot:append='')
                   q-btn(color='primary' label='Dream' icon='bubble_chart' :disabled='isWakingUp' @click='queueDream')
-                  q-btn(v-if='isDreaming || isWakingUp' :disabled='isWakingUp' :loading='isWakingUp' color='negative' label='Stop' icon='cancel' @click='stopDreaming')
               template(v-for='server in settings.servers')
                 template(v-if='server.isChecking || server.isDreaming || server.isWakingUp')
                   .flex.q-mt-md
                     div
                       q-linear-progress(style='flex: 1' dense color='blue' size='20px' :value='+(server.dreamProgress)/100' stripe='')
                         span(style='position: absolute; width: 100%; text-align: center; color: #fff; display: block; font-size: .65em') {{server.base}}
-                      q-linear-progress.q-mt-sm(color='negative' size='10px' :value='settings.servers.length/(1+queue.length)')
+                      q-linear-progress.q-mt-sm(color='negative' size='10px' :value='settings.servers.length/(settings.servers.length+queue.length)')
                         span(style='position: absolute; width: 100%; text-align: center; color: #fff; display: block; font-size: .8em')
                     div(style='flex: 0 0 120px')
                       q-btn.q-ml-md(style='height: 100%' color='negative' width='100px' icon='cancel' label='stop' @click='stopServer(server)')
@@ -63,33 +62,7 @@ import {mapState} from 'vuex'
 import store from 'store'
 
 const autosaveFields = ['queue', 'tab', 'prompt', 'sessionHash', 'lastImg', 'width', 'height', 'steps', 'batchSize']
-
-/**
- * Converts data into a format for specific Stable Diffusion apis
- */
-const sdDataScribe = function (context) {
-  let data, promptDictionary, defaults
-
-  // Select statement based on data api
-  if (true) {
-    data = []
-    promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', '', '', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
-    // promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', 'numBatches', 'batchSize', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
-    defaults = [context.defaultPrompt, '', 'None', 40, 'Euler a', false, false, 1, 1, 7, -1, -1, 0, 0, 0, context.height, context.width, 'None', null, 'Seed', '', 'Steps', '', false, []]
-  
-    // Build the data fro the given dictionary and defaults
-    promptDictionary.forEach((key, n) => {
-      if (key) {
-        data.push(context[key] || defaults[n])
-      } else {
-        data.push(defaults[n])
-      }
-    })
-  }
-
-  
-  return data
-}
+const promptFields = {prompt: null, negative: null, sessionHash: null, width: null, height: null, steps: null, numBatches: null, batchSize: null}
 
 export default {
   name: 'IndexPage',
@@ -116,6 +89,7 @@ export default {
   },
 
   mounted () {
+    globalThis.a = this
     // Handle autosave fields
     const $onloadData = store.get('txt2Img') || {}
     autosaveFields.forEach(key => {
@@ -169,6 +143,15 @@ export default {
   }),
   
   methods: {
+    getQueueData () {
+      const data = {}
+      Object.keys(promptFields).forEach(key => {
+        data[key] = this[key]
+      })
+      data.defaultPrompt = this.defaultPrompt
+      return data
+    },
+    
     /**
      * Queues up the dream and runs them if able to
      */
@@ -186,7 +169,7 @@ export default {
       // Create the batch
       const batch = []
       for (let i = 0; i < this.batchSize; i++) {
-        batch.push(sdDataScribe(this))
+        batch.push(this.getQueueData())
       }
       this.queue.push(...batch)
 
@@ -209,7 +192,6 @@ export default {
      * Check dream
      */
     checkDream (server, api) {
-      console.log('checking dream...', server)
       api
       .post('/api/predict', {
         fn_index: 4,
@@ -249,7 +231,7 @@ export default {
               this.checkDream(server, api)
             }, this.dreamCheckInterval)
           } else {
-            this.wakeUp()
+            this.wakeUp(server, api)
           }
 
           // Update UI
@@ -267,9 +249,13 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `Error checking dream: ${err}`,
+          multiLine: true,
+          message: `${server.base} -- ${err} -- Is the API right?`,
           icon: 'report_problem',
         })
+        server.isDreaming = false
+        server.isChecking = false
+        console.log(err)
       })
     },
 
@@ -278,6 +264,7 @@ export default {
      */
     startDream (server, api) {
       if (!this.queue.length) {
+        this.wakeUp(server, api)
         return
       }
       
@@ -297,7 +284,7 @@ export default {
       api
         .post('/api/predict', {
           fn_index: 3,
-          data: data,
+          data: this.prepareData(data, server),
           session_hash: this.sessionHash,
         })
         .then((response) => {
@@ -307,17 +294,26 @@ export default {
             data.push(val)
           })
 
-          const imgs = []
-          data[0].forEach((img) => {
-            imgs.unshift(img)
-          })
+          // Add the image to the queue
+          if (data[0]) {
+            const imgs = []
+            data[0].forEach((img) => {
+              imgs.unshift(img)
+            })
 
-          this.imgs.unshift(...imgs)
-          this.lastImg = this.imgs[this.imgs.length-1]
+            this.imgs.unshift(...imgs)
+            this.lastImg = this.imgs[this.imgs.length-1]
+          } else {
+            this.$q.notify({
+              color: 'negative',
+              position: 'top',
+              message: 'No images generated',
+              icon: 'report_problem'
+            })
+          }
 
           // Run next in queue
-          this.wakeUp(server)
-          this.startDream(server, api)
+          this.wakeUp(server, api)
         })
         .catch((err) => {
           this.$q.notify({
@@ -326,15 +322,21 @@ export default {
             message: `Prompting failed: ${err}`,
             icon: 'report_problem',
           })
+          console.log(err)
         })
     },
 
     /**
      * Frees up local data and allows the server to be pinged again
      */
-    wakeUp (server) {
+    wakeUp (server, api) {
       server.isChecking = false
       server.isDreaming = false
+
+      if (this.queue.length) {
+        this.startDream(server, api)
+      }
+
       this.$nextTick(() => {
         this.$forceUpdate()
       })
@@ -348,7 +350,7 @@ export default {
         })
         // @todo catch error
         .then(() => {
-          this.wakeUp(server)
+          this.wakeUp(server, api)
         })
         .catch((err) => {
           this.$q.notify({
@@ -375,6 +377,52 @@ export default {
       this.imageModal = true
       this.imageModalActiveImage = ev
     },
+
+    /**
+     * Converts data into a format for specific Stable Diffusion apis
+     */
+    prepareData (context, server) {
+      let data, promptDictionary, defaults
+
+      // Select statement based on data api
+      switch (server.api || '1.4') {
+        // @see https://github.com/AUTOMATIC1111/stable-diffusion-webui
+        case '1.4':
+          data = []
+          promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', '', '', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
+          // promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', 'numBatches', 'batchSize', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
+          defaults = [context.defaultPrompt, '', 'None', 40, 'Euler a', false, false, 1, 1, 7, -1, -1, 0, 0, 0, context.height, context.width, 'None', null, 'Seed', '', 'Steps', '', false, []]
+        
+          // Build the data fro the given dictionary and defaults
+          promptDictionary.forEach((key, n) => {
+            if (key) {
+              data.push(context[key] || defaults[n])
+            } else {
+              data.push(defaults[n])
+            }
+          })
+        break
+        
+        // @see https://github.com/AUTOMATIC1111/stable-diffusion-webui
+        case '1.5':
+          data = []
+          promptDictionary = ['prompt', 'negative', '', '', 'steps', '', '', '', '', '', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '', '']
+          // promptDictionary = ['prompt', 'negative', '', 'steps', '', '', '', 'numBatches', 'batchSize', '', '', '', '', '', '', 'height', 'width', '', '', '', '', '', '', '', '']
+          defaults = [context.defaultPrompt, '', 'None', 'None', 40, 'Euler a', false, false, 1, 1, 7, -1, -1, 0, 0, 0, context.height, context.width, 'None', null, 'Seed', '', 'Steps', '', true, false, []]
+        
+          // Build the data fro the given dictionary and defaults
+          promptDictionary.forEach((key, n) => {
+            if (key) {
+              data.push(context[key] || defaults[n])
+            } else {
+              data.push(defaults[n])
+            }
+          })
+        break
+      }
+      
+      return data
+    }    
   },
 }
 </script>
