@@ -51,10 +51,13 @@ q-page
             q-card.cursor-pointer(@click='expandImage(img)')
               q-card-section.q-pa-sm
                 q-img(:src='img.src')
+              q-card-actions(align='right')
+                q-btn(flat round color='negative' icon='delete' @click='deleteImage($event, img)')
+                q-space
 
   //- Image Modal
   q-dialog(v-model='imageModal')
-    q-card.my-card(style='min-width: 300px')
+    q-card(style='min-width: 300px')
       q-img(:src='imageModalActiveImage.src' :style='{width: imageModalActiveImage.width, height: imageModalActiveImage.height}')
       q-card-section
         pre(style='font-size:1.15em') {{imageModalActiveImage.server.dream.prompt}}
@@ -68,6 +71,9 @@ q-page
           tr 
             td steps
             td {{imageModalActiveImage.server.dream.steps}}
+      q-card-actions(align='right')
+          q-btn(flat round color='negative' icon='delete' @click='deleteImage($event, imageModalActiveImage)')
+          q-space
 </template>
 
 
@@ -77,6 +83,7 @@ import axios from 'axios'
 import {mapState} from 'vuex'
 import store from 'store'
 import {cloneDeep} from 'lodash-es'
+import { uid } from 'quasar'
 
 const autosaveFields = [
   'imgs', // Only during testing!
@@ -191,6 +198,7 @@ export default {
           message: 'No servers selected. Set one in Settings',
           position: 'top',
           color: 'red',
+          multiline: true,
           actions: [
             {
               label: 'Check servers',
@@ -354,7 +362,8 @@ export default {
               img = {
                 src: img,
                 width: 0,
-                height: 0
+                height: 0,
+                id: uid()
               }
               img.server = Object.assign({}, $server)
 
@@ -390,8 +399,18 @@ export default {
           this.$q.notify({
             color: 'negative',
             position: 'top',
+            multiline: true,
             message: `${$server.base} -- Prompting failed: ${err}`,
             icon: 'report_problem',
+            actions: [
+              {
+                label: 'Check server API',
+                color: 'white',
+                handler: () => {
+                  this.$router.push({path: '/settings'})
+                }
+              }
+            ],
           })
           console.log(err)
         })
@@ -499,6 +518,23 @@ export default {
       })
       this.queue = []
       this.autosave()
+    },
+
+    /**
+     * Deletes image (and attempts to cancel the click event)
+     */
+    deleteImage (ev, img) {
+      ev.stopPropagation()
+
+      let idxToRemove = 0
+      this.imageModal = false
+      this.imgs.find((i, n) => {
+        const isImg = i.id === img.id
+        idxToRemove = n
+        return isImg
+      })
+
+      this.imgs.splice(idxToRemove, 1)
     }
   },
 }
