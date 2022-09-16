@@ -123,24 +123,24 @@ export default {
             link: '/',
             icon: 'fas fa-home'
           },
-          // {
-          //   title: 'Studio',
-          //   description: 'Visually map and program your MIDI devices',
-          //   link: '/studio',
-          //   icon: 'fas fa-puzzle-piece fa-flip-both'
-          // },
-          // {
-          //   title: 'Factory',
-          //   description: 'Create custom blocks with JavaScript',
-          //   link: '/factory',
-          //   icon: 'fas fa-laptop-code'
-          // },
-          // {
-          //   title: 'Library',
-          //   description: 'Browse our library of user created Diffusion Blocks and learn how to use them',
-          //   link: '/library',
-          //   icon: 'fas fa-cubes'
-          // },
+          {
+            title: 'Studio',
+            description: 'Visually map and program your MIDI devices',
+            link: '/studio',
+            icon: 'fas fa-puzzle-piece fa-flip-both'
+          },
+          {
+            title: 'Factory',
+            description: 'Create custom blocks with JavaScript',
+            link: '/factory',
+            icon: 'fas fa-laptop-code'
+          },
+          {
+            title: 'Library',
+            description: 'Browse our library of user created Diffusion Blocks and learn how to use them',
+            link: '/library',
+            icon: 'fas fa-cubes'
+          },
           {
             title: 'Settings',
             description: 'Setup GPU servers and other settings',

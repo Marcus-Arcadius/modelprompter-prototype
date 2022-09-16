@@ -88,7 +88,7 @@ import {cloneDeep} from 'lodash-es'
 import { uid } from 'quasar'
 
 const autosaveFields = [
-  'imgs', // Only during testing!
+  // 'imgs', // Only during testing!
   'queue', 'tab', 'prompt', 'sessionHash', 'lastImg', 'width', 'height', 'steps', 'batchSize']
 const promptFields = {prompt: null, negative: null, sessionHash: null, width: null, height: null, steps: null, numBatches: null, batchSize: null}
 

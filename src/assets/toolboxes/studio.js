@@ -1,9 +1,28 @@
 export default [
+  ////////////////////////////////////
+  // START Unique Sidebar
+  ///////////////////////////////////
+  {
+    tag: 'category',
+    category: 'events',
+    name: 'Events',
+    icon: 'fas fa-bolt',
+    colour: '#ff628c',
+    children: []
+  },
   {
     tag: 'category',
     category: 'event',
     name: 'Events',
-    icon: 'fas fa-gamepad',
+    icon: 'fas fa-bolt',
+    colour: '#ff628c',
+    children: []
+  },
+  {
+    tag: 'category',
+    category: 'models',
+    name: 'Models',
+    icon: 'fas fa-robot',
     colour: '#fad000',
     children: []
   },
@@ -31,6 +50,9 @@ export default [
     colour: '#ffffff',
     children: []
   },
+  ////////////////////////////////////
+  // END Unique Sidebar
+  ///////////////////////////////////
   {
     tag: 'sep',
     children: []

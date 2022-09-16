@@ -10,12 +10,12 @@ Blockly.Blocks['factory_base'] = {
         .appendField('name')
         .appendField(new Blockly.FieldTextInput('block_type'), 'name')
 
-    // Category Dropdown
+    // Custom Category Dropdown
+    // Edit this to change the kinds of `category` you can select in the green box of the factory
+    // @todo document this for developers
     let dropdown = new Blockly.FieldDropdown([
-      ['misc.', 'misc'],
-      ['events', 'event'],
-      ['event modifiers', 'event_modifier'],
-      ['send events', 'event_send']
+      ['events', 'events'],
+      ['models', 'models']
     ])
 
     this.appendDummyInput()

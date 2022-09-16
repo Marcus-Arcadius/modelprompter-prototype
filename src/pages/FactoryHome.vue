@@ -164,6 +164,9 @@ import Blockly from 'blockly'
 import store from 'store'
 import {set, throttle} from 'lodash'
 import toolbox from '../assets/toolboxes/factory'
+
+// @todo Replace this with: import {uid} from quasar, then uid()
+// @see https://v1.quasar.dev/quasar-utils/other-utils#generate-uid
 import { v4 as uuidv4 } from 'uuid'
 
 /**

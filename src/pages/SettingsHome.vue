@@ -7,10 +7,10 @@ q-page.full-height
       q-card-section
         .text-h6 GPU Servers
       q-card-section
-        p Diffusion Blocks doesn't yet offer GPUs, you'll need to spin them up yourself. However this can be done for free! You can either use a local one through <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">AUTOMATIC1111/stable-diffusion-webui</a> (v1.5) and <a href="https://github.com/sd-webui/stable-diffusion-webui">sd-webui/stable-diffusion-webui</a> (v1.5), or use a cloud hosted notebooks:
+        p Diffusion Blocks doesn't yet offer GPUs, you'll need to spin them up yourself. However this can be done for free! You can either use a local one through <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">AUTOMATIC1111/stable-diffusion-webui</a> and <a href="https://github.com/sd-webui/stable-diffusion-webui">sd-webui/stable-diffusion-webui</a>, or use a cloud hosted notebooks:
         ul
           li
-            | (v1.5) Google Colab:
+            | Google Colab:
             a(href='https://colab.research.google.com/drive/1Iy-xW9t1-OQWhb0hNxueGij8phCyluOh') StableDiffusionUI-Voldemort.ipynb
 
       q-card-section

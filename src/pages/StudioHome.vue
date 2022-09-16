@@ -63,15 +63,16 @@ q-page.full-height
 
 <script>
 import {throttle, cloneDeep, set, sortBy} from 'lodash'
-import {mapState} from 'vuex'
 import Workspace from '../components/Workspace'
 import DialogLoadDiffblock from '../components/dialog/LoadDiffblock'
 import DialogDeleteDiffblock from '../components/dialog/DeleteDiffblock'
 import DialogConfirm from '../components/dialog/Confirm'
 import store from 'store'
-import webmidi from 'webmidi'
 import Blockly from 'blockly'
 import toolbox from '../assets/toolboxes/studio'
+
+// @todo Replace this with: import {uid} from quasar, then uid()
+// @see https://v1.quasar.dev/quasar-utils/other-utils#generate-uid
 import {v4 as uuidv4} from 'uuid'
 
 /**
@@ -98,34 +99,10 @@ export default {
   },
 
   /**
-   * Initialize Webmidi
+   * Initialize
    */
   mounted () {
     set(window, 'app.$studio', this)
-
-    webmidi.enable((errors) => {
-      const inputs = {}
-      const outputs = {}
-      
-      this.errors.webmidi.enable = errors
-
-      // Map array to object using device.id
-      // @note Any new properties must be set below or Vue won't refresh/update
-      webmidi.inputs.forEach(input => {
-        inputs[input.id] = input
-        input.led = false
-        input.lastMessage = ''
-        this.bindInput(input.id)
-      })
-      webmidi.outputs.forEach(output => {
-        outputs[output.id] = output
-      })
-      
-      this.$store.commit('set', ['devices', {
-        inputs,
-        outputs
-      }])
-    })
 
     // Load workspace
     const currentStudio = store.get('currentStudio', {})
@@ -187,12 +164,6 @@ export default {
       
       hasLoaded: false,
       
-      errors: {
-        webmidi: {
-          enable: false
-        }
-      },
-
       // Current bookmark index
       currentBookmark: -1,
 
@@ -466,28 +437,6 @@ export default {
       })
 
       return categories
-    },
-
-    /**
-     * Binds individiual inputs
-     */
-    bindInput (id) {
-      const input = webmidi.getInputById(id)
-      const events = [/*'midimessage',*/ 'activesensing', 'channelaftertouch', 'channelmode', 'clock', 'continue', 'controlchange', 'keyaftertouch', 'noteoff', 'noteon', 'nrpn', 'pitchbend', 'programchange', 'reset', 'songposition', 'songselect', 'start', 'stop', 'sysex', 'timecode', 'tuningrequest', 'unknownsystemmessage']
-
-      events.forEach(eventName => {
-        input.addListener(eventName, 'all', ev => {
-          this.triggerEvent(eventName, ev)
-        })
-      })
-
-      // Toggle the light indicator
-      input.addListener('midimessage', 'all', e => {
-        this.$store.commit('set', [`devices.inputs['${e.target.id}'].led`, true])
-        setTimeout(() => {
-          this.$store.commit('set', [`devices.inputs['${e.target.id}'].led`, false])
-        }, 10)
-      })
     },
 
     /**
