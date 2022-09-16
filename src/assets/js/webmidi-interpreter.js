@@ -24,7 +24,7 @@ console = {
  * @param {Array} args The list of arguments
  * @param {Function} callback The function to call when this event is triggered
  */
-addEventListener = function (eventName, args, callback) {
+onEvent = function (eventName, args, callback) {
   if (!_events[eventName]) {
     _events[eventName] = []
   }

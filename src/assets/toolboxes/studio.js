@@ -12,34 +12,10 @@ export default [
   },
   {
     tag: 'category',
-    category: 'event',
-    name: 'Events',
-    icon: 'fas fa-bolt',
-    colour: '#ff628c',
-    children: []
-  },
-  {
-    tag: 'category',
     category: 'models',
     name: 'Models',
     icon: 'fas fa-robot',
     colour: '#fad000',
-    children: []
-  },
-  {
-    tag: 'category',
-    category: 'event_modifier',
-    name: 'Event Modifiers',
-    icon: 'fas fa-filter',
-    colour: '#FF9D00',
-    children: []
-  },  
-  {
-    tag: 'category',
-    category: 'event_send',
-    name: 'Send Event',
-    icon: 'fas fa-broadcast-tower',
-    colour: '#2EC4B6',
     children: []
   },
   {

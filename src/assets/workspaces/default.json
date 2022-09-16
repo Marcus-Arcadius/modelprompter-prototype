@@ -6,36 +6,38 @@
       "title": "Diffusion Blocks Home",
       "description": "Used as the landing page workspaces for EverestWonder.com/diffusion-blocks. This workspace makes use of the Bookmark Block to guide users throughout the application!",
       "uuid": "6fe67f5f-1b78-4840-a599-6ba7a6a7a7c9",
-      "workspace": "<xml xmlns=\"https://developers.google.com/blockly/xml\"><block type=\"bookmark\" id=\"{{qbbJxrQKg@QZx3kJD7\" x=\"625\" y=\"225\"><field name=\"index\">0</field><comment pinned=\"true\" h=\"194\" w=\"334\">Hi 👋 Welcome to Diffusion Blocks!&#10;&#10;Diffusion Blocks is a visual, all-in-one MIDI mapping, scripting, and live coding platform for driving highly collaborative MIDI experiences.&#10;&#10;To learn what that means, scroll down by dragging on the workspace or by using the scrollbars.</comment></block><block type=\"bookmark\" id=\"!p4Jtf(_ukQG/|H79[1Q\" x=\"623\" y=\"1025\"><field name=\"index\">1</field><comment pinned=\"true\" h=\"147\" w=\"305\">This is a Bookmark Block, you can add them to workspaces to make it easy to jump around.&#10;&#10;Click the ▶ at the top to jump to the next one</comment></block><block type=\"bookmark\" id=\"(mj#]pQO}=FlhMr]*~*!\" x=\"625\" y=\"1775\"><field name=\"index\">2</field><comment pinned=\"true\" h=\"100\" w=\"280\">...actually that's all for now 😅&#10;&#10;More coming soon!</comment></block><block type=\"event_midi\" id=\"V6qa47.h;|)tPE@:fqND\" x=\"775\" y=\"1775\"><field name=\"event\">noteon</field><field name=\"device\">any</field><statement name=\"statements\"><block type=\"note_send\" id=\"^qFaVbHS1*32({Qa@alq\"><field name=\"note\">C4</field><field name=\"device\">all</field><field name=\"channel\">all</field></block></statement></block></xml>"
+      "workspace": "<xml xmlns=\"https://developers.google.com/blockly/xml\"></xml>"
     },
     "currentFactory": {
-      "uuid": "6d675ace-0a37-4b1f-8bfa-513fd137b81f",
+      "uuid": "4de88dbf-4e56-4d1f-8991-2223ffbe1a5f",
       "json": {
-        "type": "bookmark",
+        "type": "when_gpu_ready",
         "tooltip": "",
-        "helpUrl": "https://EverestWonder.com/diffusion-blocks/help/block/bookmark",
-        "message0": "📌 %1",
+        "helpUrl": "https://everestwonder.com/diffusion-blocks/help/block/when_gpu_ready",
+        "message0": "When a GPU is available %1 %2",
         "args0": [
           {
-            "type": "field_number",
-            "name": "index",
-            "value": 0
+            "type": "input_dummy"
+          },
+          {
+            "type": "input_statement",
+            "name": "statements"
           }
         ],
-        "colour": "#fff"
+        "colour": "#ff628c"
       },
-      "code": "/**\r\n * This is the bookmark block.\r\n * @todo Add code to this block 😅\r\n */",
+      "code": "onEvent('gpu.ready', function () {\n  $statements()\n})",
       "variables": [
         {
-          "type": "field",
-          "field": "number",
-          "name": "index"
+          "type": "input",
+          "input": "statements",
+          "name": "statements"
         }
       ],
       "description": "",
-      "name": "bookmark",
-      "category": "misc",
-      "workspace": "<xml xmlns=\"https://developers.google.com/blockly/xml\"><block type=\"factory_base\" id=\"o)]~^g?+Z8Zx~*I~Nv#^\" deletable=\"false\" movable=\"false\" x=\"10\" y=\"10\"><mutation connections=\"NONE\"></mutation><field name=\"name\">bookmark</field><field name=\"category\">misc</field><field name=\"INLINE\">AUTO</field><field name=\"CONNECTIONS\">NONE</field><statement name=\"INPUTS\"><block type=\"input_dummy\" id=\"rS0y4nN{g3CF2Q(uJ|zY\"><field name=\"ALIGN\">LEFT</field><statement name=\"FIELDS\"><block type=\"field_static\" id=\"7.nS9XE$yVxtOgY^4/Rx\"><field name=\"TEXT\">📌</field><next><block type=\"field_number\" id=\"fKkD3?V,JX!(807:Sr#4\"><field name=\"VALUE\">0</field><field name=\"FIELDNAME\">index</field><field name=\"MIN\">-Infinity</field><field name=\"MAX\">Infinity</field><field name=\"PRECISION\">0</field></block></next></block></statement></block></statement><value name=\"COLOR\"><shadow type=\"style_color\" id=\"?}w]N$5{m|#R|W[Z-Z.2\"><mutation colour=\"#ffffff\"></mutation><field name=\"COLOR\">#fff</field></shadow></value></block></xml>"
+      "name": "when_gpu_ready",
+      "category": "events",
+      "workspace": "<xml xmlns=\"https://developers.google.com/blockly/xml\"><block type=\"factory_base\" id=\"xjl^u|=:LQgal`j]L2J5\" deletable=\"false\" movable=\"false\" x=\"10\" y=\"10\"><mutation connections=\"NONE\"></mutation><field name=\"name\">when_gpu_ready</field><field name=\"category\">events</field><field name=\"INLINE\">AUTO</field><field name=\"CONNECTIONS\">NONE</field><statement name=\"INPUTS\"><block type=\"input_dummy\" id=\"_OEw#lnKV3b+vLz)]B@F\"><field name=\"ALIGN\">LEFT</field><statement name=\"FIELDS\"><block type=\"field_static\" id=\"e%}7[WkGXvGGL*k9Hvzu\"><field name=\"TEXT\">When a GPU is available</field></block></statement><next><block type=\"input_statement\" id=\"cSbz0Rro6t7oKwjnH]J#\"><field name=\"INPUTNAME\">statements</field><field name=\"ALIGN\">LEFT</field><value name=\"TYPE\"><shadow type=\"type_null\" id=\"LOD~pm(-XMu,nZhQw4Ew\"></shadow></value></block></next></block></statement><value name=\"COLOR\"><shadow type=\"style_color\" id=\"K{3~AJ@?H/[I]HeuD-wg\"><mutation colour=\"#ff628c\"></mutation><field name=\"COLOR\">#ff628c</field></shadow></value></block></xml>"
     },
     "isStudioUnsaved": false,
     "isFactoryUnsaved": false,
@@ -256,7 +258,7 @@
         "title": "Diffusion Blocks Home",
         "description": "Used as the landing page workspaces for EverestWonder.com/diffusion-blocks. This workspace makes use of the Bookmark Block to guide users throughout the application!",
         "uuid": "6fe67f5f-1b78-4840-a599-6ba7a6a7a7c9",
-        "workspace": "<xml xmlns=\"https://developers.google.com/blockly/xml\"><block type=\"bookmark\" id=\"{{qbbJxrQKg@QZx3kJD7\" x=\"625\" y=\"225\"><field name=\"index\">0</field><comment pinned=\"true\" h=\"194\" w=\"334\">Hi 👋 Welcome to Diffusion Blocks!&#10;&#10;Diffusion Blocks is a visual, all-in-one MIDI mapping, scripting, and live coding platform for driving highly collaborative MIDI experiences.&#10;&#10;To learn what that means, scroll down by dragging on the workspace or by using the scrollbars.</comment></block><block type=\"bookmark\" id=\"!p4Jtf(_ukQG/|H79[1Q\" x=\"623\" y=\"1025\"><field name=\"index\">1</field><comment pinned=\"true\" h=\"147\" w=\"305\">This is a Bookmark Block, you can add them to workspaces to make it easy to jump around.&#10;&#10;Click the ▶ at the top to jump to the next one</comment></block><block type=\"bookmark\" id=\"(mj#]pQO}=FlhMr]*~*!\" x=\"625\" y=\"1775\"><field name=\"index\">2</field><comment pinned=\"true\" h=\"100\" w=\"280\">...actually that's all for now 😅&#10;&#10;More coming soon!</comment></block><block type=\"event_midi\" id=\"V6qa47.h;|)tPE@:fqND\" x=\"775\" y=\"1775\"><field name=\"event\">noteon</field><field name=\"device\">any</field><statement name=\"statements\"><block type=\"note_send\" id=\"^qFaVbHS1*32({Qa@alq\"><field name=\"note\">C4</field><field name=\"device\">all</field><field name=\"channel\">all</field></block></statement></block></xml>"
+        "workspace": "<xml xmlns=\"https://developers.google.com/blockly/xml\"></xml>"
       }
     }
   }
