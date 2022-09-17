@@ -119,7 +119,7 @@ export default {
         links: [
           {
             title: 'Home',
-            description: 'Get an overview of what Diffusion Blocks is about',
+            description: 'Get an overview of what Model Prompter is about',
             link: '/',
             icon: 'fas fa-home'
           },
@@ -137,7 +137,7 @@ export default {
           },
           {
             title: 'Library',
-            description: 'Browse our library of user created Diffusion Blocks and learn how to use them',
+            description: 'Browse our library of user created Model Prompter and learn how to use them',
             link: '/library',
             icon: 'fas fa-cubes'
           },

@@ -60,9 +60,9 @@ npm run dream-server    # See package.json for other server options
 
 # About
 
-**Diffusion Blocks is a visual, all-in-one MIDI mapping, scripting, and live coding platform for driving highly collaborative MIDI experiences.**
+**Model Prompter is a visual, all-in-one MIDI mapping, scripting, and live coding platform for driving highly collaborative MIDI experiences.**
 
-Some things Diffusion Blocks can (eventually) help you do:
+Some things Model Prompter can (eventually) help you do:
 - Quickly map MIDI to JavaScript variables, functions, and events on any web site or web service
 - Use MIDI to drive custom apps with libraries like [magenta.js](https://magenta.tensorflow.org/), [ml5.js](https://ml5js.org/), [p5.js](https://p5js.org/), [handsfree.js](https://github.com/everestwonder/handsfree), and others
 - Send MIDI to your native [Digital Audio Workstations (DAWs)](https://en.wikipedia.org/wiki/Digital_audio_workstation#List_of_notable_commercial_DAWs) and apps
@@ -216,7 +216,7 @@ The following is available inside `localStorage`:
 ```js
 {
   blocks: [],           // All loaded Factory Blocks
-  diffblocks: [],       // All loaded Studio Diffusion Blocks
+  diffblocks: [],       // All loaded Studio Model Prompter
   currentFactory: {},   // The Factory's last state (autosave)
   currentStudio: {},    // The Studio's last state (autosave)
   splitter: 50

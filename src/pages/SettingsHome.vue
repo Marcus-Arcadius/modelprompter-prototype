@@ -7,7 +7,7 @@ q-page.full-height
       q-card-section
         .text-h6 GPU Servers
       q-card-section
-        p Diffusion Blocks doesn't yet offer GPUs, you'll need to spin them up yourself. However this can be done for free! You can either use a local one through <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">AUTOMATIC1111/stable-diffusion-webui</a> and <a href="https://github.com/sd-webui/stable-diffusion-webui">sd-webui/stable-diffusion-webui</a>, or use a cloud hosted notebooks:
+        p Model Prompter doesn't yet offer GPUs, you'll need to spin them up yourself. However this can be done for free! You can either use a local one through <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">AUTOMATIC1111/stable-diffusion-webui</a> and <a href="https://github.com/sd-webui/stable-diffusion-webui">sd-webui/stable-diffusion-webui</a>, or use a cloud hosted notebooks:
         ul
           li
             | Google Colab:

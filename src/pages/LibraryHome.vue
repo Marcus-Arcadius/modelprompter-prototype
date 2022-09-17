@@ -3,7 +3,7 @@ q-page.full-height
   section.content
     h1 Library
 
-    h4 Diffusion Blocks
+    h4 Model Prompter
     DiffblocksTable
 
     h4 Building blocks

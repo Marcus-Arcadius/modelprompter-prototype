@@ -167,9 +167,9 @@ module.exports = function (ctx) {
       workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: `Diffusion Blocks`,
-        short_name: `Diffusion Blocks`,
-        description: 'A visual MIDI mapping and scripting platform',
+        name: `Model Prompter`,
+        short_name: `Model Prompter`,
+        description: 'Automate prompts to Stable Diffusion using multiple (free) cloud GPUs 🙋🎨🤖',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',

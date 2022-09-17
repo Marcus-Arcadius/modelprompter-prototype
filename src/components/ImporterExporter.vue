@@ -25,7 +25,7 @@ q-btn.full-width(type='a' color='secondary' icon='fas fa-user' @click='showModal
     title='Reset everything?'
     accept-label='Reset'
     @accept='reset')
-      p This will reset everything to the <a href="https://github.com/EverestWonder/diffusion-blocks/releases">most recent Diffusion Blocks release</a>.
+      p This will reset everything to the <a href="https://github.com/EverestWonder/diffusion-blocks/releases">most recent Model Prompter release</a>.
       p You'll lose your current workspaces, but get all the latest core workspaces.
       p You'll still be able to import your own workspaces after.
 </template>

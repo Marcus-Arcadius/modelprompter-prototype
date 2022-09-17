@@ -46,7 +46,7 @@ import STRING_WebmidiInterpreter from '!!raw-loader!!../assets/js/webmidi-interp
 import webmidi from 'webmidi'
 import {defaults} from 'lodash'
 import Interpreter from 'js-interpreter'
-import diffusionBlocksTheme from '../assets/toolboxes/theme'
+import modelPrompterTheme from '../assets/toolboxes/theme'
 import * as Babel from '@babel/standalone'
 
 /**
@@ -111,7 +111,7 @@ export default {
         colour: '#9effff',
         snap: true
       },
-      theme: diffusionBlocksTheme
+      theme: modelPrompterTheme
     })
 
     // Create workspace and add bindings

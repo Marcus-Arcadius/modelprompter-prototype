@@ -3,7 +3,7 @@
     "loglevel:webpack-dev-server": "SILENT",
     "splitter": 50,
     "currentStudio": {
-      "title": "Diffusion Blocks Home",
+      "title": "Model Prompter Home",
       "description": "Used as the landing page workspaces for EverestWonder.com/diffusion-blocks. This workspace makes use of the Bookmark Block to guide users throughout the application!",
       "uuid": "6fe67f5f-1b78-4840-a599-6ba7a6a7a7c9",
       "workspace": "<xml xmlns=\"https://developers.google.com/blockly/xml\"></xml>"
@@ -255,7 +255,7 @@
     },
     "diffblocks": {
       "6fe67f5f-1b78-4840-a599-6ba7a6a7a7c9": {
-        "title": "Diffusion Blocks Home",
+        "title": "Model Prompter Home",
         "description": "Used as the landing page workspaces for EverestWonder.com/diffusion-blocks. This workspace makes use of the Bookmark Block to guide users throughout the application!",
         "uuid": "6fe67f5f-1b78-4840-a599-6ba7a6a7a7c9",
         "workspace": "<xml xmlns=\"https://developers.google.com/blockly/xml\"></xml>"
